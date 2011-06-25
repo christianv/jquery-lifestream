@@ -149,6 +149,40 @@
    */
   $.fn.lifestream.feeds = $.fn.lifestream.feeds || {};
 
+  $.fn.lifestream.feeds.blogger = function ( config, callback ) {
+
+    var parseBlogger = function ( input ) {
+      var output = [], list, i = 0, j, item;
+
+      if ( input.query && input.query.count && input.query.count > 0
+          && input.query.results.feed.entry ) {
+        list = input.query.results.feed.entry;
+        j = list.length;
+        for ( ; i < j; i++) {
+          item = list[i];
+
+          output.push({
+            date: new Date( item.published ),
+            config: config,
+            html: 'posted "<a href="' + item.origLink + '">'
+            + item.title + '</a>"'
+          });
+        }
+      }
+
+      return output;
+    }
+
+    $.ajax({
+      url: createYqlUrl('select * from xml where '
+        + 'url="http://' + config.user + '.blogspot.com/feeds/posts/default"'),
+      dataType: "jsonp",
+      success: function ( data ) {
+        callback(parseBlogger(data));
+      }
+    });
+
+  };
   $.fn.lifestream.feeds.dailymotion = function( config, callback ) {
 
     var parseDailymotion = function( input ) {
@@ -318,6 +352,40 @@
         }
 
         callback(output);
+      }
+    });
+
+  };
+  $.fn.lifestream.feeds.formspring = function ( config, callback ) {
+
+    var parseFormspring = function ( input ) {
+      var output = [], list, i = 0, j, item;
+
+      if ( input.query && input.query.count && input.query.count > 0
+          && input.query.results.rss.channel.item ) {
+        list = input.query.results.rss.channel.item;
+        j = list.length;
+        for ( ; i < j; i++) {
+          item = list[i];
+
+          output.push({
+            date: new Date( item.pubDate ),
+            config: config,
+            html: 'answered a question : <a href="' + item.link + '">'
+            + item.title + '</a>'
+          });
+        }
+      }
+
+      return output;
+    }
+
+    $.ajax({
+      url: createYqlUrl('select * from xml where '
+        + 'url="http://www.formspring.me/profile/' + config.user + '.rss"'),
+      dataType: "jsonp",
+      success: function ( data ) {
+        callback(parseFormspring(data));
       }
     });
 
@@ -704,6 +772,41 @@
 
   };
 
+  $.fn.lifestream.feeds.posterous = function ( config, callback ) {
+
+    var parsePosterous = function ( input ) {
+      var output = [], list, i = 0, j, item;
+
+      if ( input.query && input.query.count && input.query.count > 0
+          && input.query.results.rss.channel.item ) {
+        list = input.query.results.rss.channel.item;
+        j = list.length;
+        for ( ; i < j; i++) {
+          item = list[i];
+
+          output.push({
+            date: new Date( item.pubDate ),
+            config: config,
+            html: 'posted "<a href="' + item.link + '">'
+            + item.title + '</a>"'
+          });
+        }
+      }
+
+      return output;
+    }
+
+    $.ajax({
+      url: createYqlUrl('select * from xml where '
+        + 'url="http://' + config.user + '.posterous.com/rss.xml"'),
+      dataType: "jsonp",
+      success: function ( data ) {
+        callback(parsePosterous(data));
+      }
+    });
+
+  };
+
   $.fn.lifestream.feeds.reddit = function( config, callback ) {
 
     /**
@@ -1034,6 +1137,41 @@
       crossDomain: true,
       success: function( data ) {
         callback(parseVimeo(data));
+      }
+    });
+
+  };
+  
+  $.fn.lifestream.feeds.wordpress = function ( config, callback ) {
+
+    var parseWordpress = function ( input ) {
+      var output = [], list, i = 0, j, item;
+
+      if ( input.query && input.query.count && input.query.count > 0
+          && input.query.results.rss.channel.item ) {
+        list = input.query.results.rss.channel.item;
+        j = list.length;
+        for ( ; i < j; i++) {
+          item = list[i];
+
+          output.push({
+            date: new Date( item.pubDate ),
+            config: config,
+            html: 'posted "<a href="' + item.link + '">'
+            + item.title + '</a>"'
+          });
+        }
+      }
+
+      return output;
+    }
+
+    $.ajax({
+      url: createYqlUrl('select * from xml where '
+        + 'url="http://' + config.user + '.wordpress.com/feed"'),
+      dataType: "jsonp",
+      success: function ( data ) {
+        callback(parseWordpress(data));
       }
     });
 
