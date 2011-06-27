@@ -25,6 +25,14 @@
    */
   $.fn.lifestream = function( config ) {
 
+    var dayLimitValues = ['today', '1day'],
+
+        isAcceptedLimit = ( config.dayLimit && 
+                          $.inArray(config.dayLimit, dayLimitValues) > -1 ),
+
+        dateLimit = new Date();
+    dateLimit.setHours(0,0,0,0);
+
     // The element where the lifestream is linked to
     var outputElement = this,
 
@@ -76,7 +84,7 @@
           length = ( items.length < settings.limit ) ?
             items.length :
             settings.limit,
-          i = 0, item,
+          i = 0, item, itemDate,
 
           // We create an unordered list which will create all the feed items
           ul = $('<ul class="' + settings.classname + '"/>');
@@ -85,7 +93,10 @@
       // list
       for ( ; i < length; i++ ) {
         item = items[i];
-        if ( item.html ) {
+        itemDate = item.date.setHours(0,0,0,0);
+
+        if ( item.html && (!settings.dayLimit || !isAcceptedLimit || 
+               (isAcceptedLimit && itemDate >= dateLimit.getTime())) ) {
           $('<li class="'+ settings.classname + '-'
             + item.config.service + '">').append( item.html ).appendTo( ul );
         }
