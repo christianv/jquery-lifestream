@@ -1,6 +1,6 @@
 /*!
  * jQuery Lifestream Plug-in
- * @version 0.1.0
+ * @version 0.1.1
  * Show a stream of your online activity
  *
  * Copyright 2011, Christian Vuerings - http://denbuzze.com
@@ -25,133 +25,149 @@
    */
   $.fn.lifestream = function( config ) {
 
-    var dayLimitValues = ['today', '1day'],
+    // Make the plug-in chainable
+    return this.each(function() {
 
-        isAcceptedLimit = ( config.dayLimit && 
+			var dayLimitValues = ['today', '1day'],
+
+					isAcceptedLimit = ( config.dayLimit && 
                           $.inArray(config.dayLimit, dayLimitValues) > -1 ),
 
-        dateLimit = new Date();
-    dateLimit.setHours(0,0,0,0);
+					dateLimit = new Date();
+			dateLimit.setHours(0,0,0,0);
 
-    // The element where the lifestream is linked to
-    var outputElement = this,
+      // The element where the lifestream is linked to
+      var outputElement = $(this),
 
-    // Extend the default settings with the values passed
-    settings = jQuery.extend({
-      // The name of the main lifestream class
-      // We use this for the main ul class e.g. lifestream
-      // and for the specific feeds e.g. lifestream-twitter
-      classname: "lifestream",
-      // The amount of feed items you want to show
-      limit: 10
-    }, config),
+      // Extend the default settings with the values passed
+      settings = jQuery.extend({
+        // The name of the main lifestream class
+        // We use this for the main ul class e.g. lifestream
+        // and for the specific feeds e.g. lifestream-twitter
+        classname: "lifestream",
+        // Callback function which will be triggered when a feed is loaded
+        feedloaded: null,
+        // The amount of feed items you want to show
+        limit: 10,
+        // An array of feed items which you want to use
+        list: []
+      }, config),
 
-    // The data object contains all the feed items
-    data = {
-      count: settings.list.length,
-      items: []
-    },
+      // The data object contains all the feed items
+      data = {
+        count: settings.list.length,
+        items: []
+      },
 
-    // We use the item settings to pass the global settings variable to
-    // every feed
-    itemsettings = jQuery.extend( true, {}, settings ),
+      // We use the item settings to pass the global settings variable to
+      // every feed
+      itemsettings = jQuery.extend( true, {}, settings ),
 
-    /**
-     * This method will be called every time a feed is loaded. This means
-     * that several DOM changes will occur. We did this because otherwise it
-     * takes to look before anything shows up.
-     * We allow 1 request per feed - so 1 DOM change per feed
-     * @private
-     * @param {Array} inputdata an array containing all the feeditems for a
-     * specific feed.
-     */
-    finished = function( inputdata ) {
+      /**
+       * This method will be called every time a feed is loaded. This means
+       * that several DOM changes will occur. We did this because otherwise it
+       * takes to look before anything shows up.
+       * We allow 1 request per feed - so 1 DOM change per feed
+       * @private
+       * @param {Array} inputdata an array containing all the feeditems for a
+       * specific feed.
+       */
+      finished = function( inputdata ) {
 
-      // Merge the feed items we have from other feeds, with the feeditems
-      // from the new feed
-      $.merge( data.items, inputdata );
+        // Merge the feed items we have from other feeds, with the feeditems
+        // from the new feed
+        $.merge( data.items, inputdata );
 
-      // Sort the feeditems by date - we want the most recent one first
-      data.items.sort( function( a, b ) {
-          return ( b.date - a.date );
-      });
+        // Sort the feeditems by date - we want the most recent one first
+        data.items.sort( function( a, b ) {
+            return ( b.date - a.date );
+        });
 
-      var items = data.items,
+        var items = data.items,
 
-          // We need to check whether the amount of current feed items is
-          // smaller than the main limit. This parameter will be used in the
-          // for loop
-          length = ( items.length < settings.limit ) ?
-            items.length :
-            settings.limit,
-          i = 0, item, itemDate,
+            // We need to check whether the amount of current feed items is
+            // smaller than the main limit. This parameter will be used in the
+            // for loop
+            length = ( items.length < settings.limit ) ?
+              items.length :
+              settings.limit,
+            i = 0, item, itemDate,
 
-          // We create an unordered list which will create all the feed items
-          ul = $('<ul class="' + settings.classname + '"/>');
+            // We create an unordered list which will create all the feed
+            // items
+            ul = $('<ul class="' + settings.classname + '"/>');
 
-      // Run over all the feed items + add them as list items to the unordered
-      // list
-      for ( ; i < length; i++ ) {
-        item = items[i];
-        itemDate = item.date.setHours(0,0,0,0);
-
-        if ( item.html && (!settings.dayLimit || !isAcceptedLimit || 
+        // Run over all the feed items + add them as list items to the
+        // unordered list
+        for ( ; i < length; i++ ) {
+          item = items[i];
+          itemDate = item.date.setHours(0,0,0,0);
+          if ( item.html && (!settings.dayLimit || !isAcceptedLimit || 
                (isAcceptedLimit && itemDate >= dateLimit.getTime())) ) {
-          $('<li class="'+ settings.classname + '-'
-            + item.config.service + '">').append( item.html ).appendTo( ul );
+            $('<li class="'+ settings.classname + '-'
+              + item.config.service + '">').append( item.html )
+                                           .appendTo( ul );
         }
       }
 
-      // Change the innerHTML with a list of all the feeditems in
-      // chronological order
-      outputElement.html( ul );
+        // Change the innerHTML with a list of all the feeditems in
+        // chronological order
+        outputElement.html( ul );
 
-    },
-
-    /**
-     * Fire up all the feeds and pass them the right arugments.
-     * @private
-     */
-    load = function() {
-
-      var i = 0, j = settings.list.length;
-
-      // We don't pass the list array to each feed  because this will create
-      // a recursive JavaScript object
-      delete itemsettings.list;
-
-      // Run over all the items in the list
-      for( ; i < j; i++ ) {
-
-        var config = settings.list[i];
-
-        // Check whether the feed exists, if the feed is a function and if a
-        // user has been filled in
-        if ( $.fn.lifestream.feeds[config.service] &&
-             $.isFunction( $.fn.lifestream.feeds[config.service] )
-             && config.user) {
-
-          // You'll be able to get the global settings by using
-          // config._settings in your feed
-          config._settings = itemsettings;
-
-          // Call the feed with a config object and finished callback
-          $.fn.lifestream.feeds[config.service]( config, finished );
+        // Trigger the feedloaded callback, if it is a function
+        if ( $.isFunction( settings.feedloaded ) ) {
+          settings.feedloaded();
         }
 
+      },
+
+      /**
+       * Fire up all the feeds and pass them the right arugments.
+       * @private
+       */
+      load = function() {
+
+        var i = 0, j = settings.list.length;
+
+        // We don't pass the list array to each feed  because this will create
+        // a recursive JavaScript object
+        delete itemsettings.list;
+
+        // Run over all the items in the list
+        for( ; i < j; i++ ) {
+
+          var config = settings.list[i];
+
+          // Check whether the feed exists, if the feed is a function and if a
+          // user has been filled in
+          if ( $.fn.lifestream.feeds[config.service] &&
+               $.isFunction( $.fn.lifestream.feeds[config.service] )
+               && config.user) {
+
+            // You'll be able to get the global settings by using
+            // config._settings in your feed
+            config._settings = itemsettings;
+
+            // Call the feed with a config object and finished callback
+            $.fn.lifestream.feeds[config.service]( config, finished );
+          }
+
+        }
+
+      };
+
+      // Load the jQuery templates plug-in if it wasn't included in the page.
+      // At then end we call the load method.
+      if( !jQuery.tmpl ) {
+        jQuery.getScript(
+          "https://raw.github.com/jquery/jquery-tmpl/master/"
+            + "jquery.tmpl.min.js",
+          load);
+      } else {
+        load();
       }
 
-    };
-
-    // Load the jQuery templates plug-in if it wasn't included in the page.
-    // At then end we call the load method.
-    if( !jQuery.tmpl ) {
-      jQuery.getScript(
-        "https://raw.github.com/jquery/jquery-tmpl/master/jquery.tmpl.min.js",
-        load);
-    } else {
-      load();
-    }
+    });
 
   };
 
@@ -160,9 +176,61 @@
    */
   $.fn.lifestream.feeds = $.fn.lifestream.feeds || {};
 
+  $.fn.lifestream.feeds.blogger = function( config, callback ) {
+
+    var template = $.extend({},
+      {
+        posted: 'posted <a href="${origLink}">${title}</a>'
+      },
+      config.template),
+
+    parseBlogger = function ( input ) {
+      var output = [], list, i = 0, j, item;
+
+      if ( input.query && input.query.count && input.query.count > 0
+          && input.query.results.feed.entry ) {
+        list = input.query.results.feed.entry;
+        j = list.length;
+        for ( ; i < j; i++) {
+          item = list[i];
+
+          output.push({
+            date: new Date( item.published ),
+            config: config,
+            html: $.tmpl( template.posted, item )
+          });
+        }
+      }
+
+      return output;
+    };
+
+    $.ajax({
+      url: createYqlUrl('select * from xml where url="http://'
+        + config.user + '.blogspot.com/feeds/posts/default"'),
+      dataType: "jsonp",
+      success: function ( data ) {
+        callback(parseBlogger(data));
+      }
+    });
+
+    // Expose the template.
+    // We use this to check which templates are available
+    return {
+      "template" : template
+    };
+
+  };
+
   $.fn.lifestream.feeds.dailymotion = function( config, callback ) {
 
-    var parseDailymotion = function( input ) {
+    var template = $.extend({},
+      {
+        uploaded: 'uploaded a video <a href="${link}">${title[0]}</a>'
+      },
+      config.template),
+
+    parseDailymotion = function( input ) {
 
       var output = [], list, i = 0, j, item;
 
@@ -172,12 +240,10 @@
         j = list.length;
         for ( ; i < j; i++) {
           item = list[i];
-
           output.push({
-            date: new Date( item.pubDate ),
+            date: new Date ( item.pubDate ),
             config: config,
-            html: 'uploaded a video <a href="' + item.link + '">'
-            + item.title + '</a>'
+            html: $.tmpl( template.uploaded, item )
           });
         }
       }
@@ -195,10 +261,21 @@
       }
     });
 
+    // Expose the template.
+    // We use this to check which templates are available
+    return {
+      "template" : template
+    };
+
   };
 
-  $.fn.lifestream.feeds.delicious = function f ( config , callback ) {
-    config.template = $.extend({}, f.template, config.template);
+  $.fn.lifestream.feeds.delicious = function( config, callback ) {
+
+    var template = $.extend({},
+      {
+        bookmarked: 'bookmarked <a href="${u}">${d}</a>'
+      },
+      config.template);
 
     $.ajax({
       url: "http://feeds.delicious.com/v2/json/" + config.user,
@@ -212,23 +289,29 @@
             output.push({
               date: new Date(item.dt),
               config: config,
-              html: $.tmpl(config.template.bookmarkcreation, {
-                url: item.u,
-                title: item.d
-              })
+              html: $.tmpl( template.bookmarked, item )
             });
           }
         }
         callback(output);
       }
     });
-  };
-  $.fn.lifestream.feeds.delicious.template = {
-    bookmarkcreation: 'bookmarked <a href="${url}">${title}</a>'
+
+    // Expose the template.
+    // We use this to check which templates are available
+    return {
+      "template" : template
+    };
+
   };
 
-  $.fn.lifestream.feeds.deviantart = function f(config, callback) {
-    config.template = $.extend({}, f.template, config.template);
+  $.fn.lifestream.feeds.deviantart = function( config, callback ) {
+
+    var template = $.extend({},
+      {
+        posted: 'posted <a href="${link}">${title}</a>'
+      },
+      config.template);
 
     $.ajax({
       url: createYqlUrl(
@@ -251,29 +334,29 @@
             output.push({
               date: new Date(item.pubDate),
               config: config,
-              html: $.tmpl(config.template.deviationpost, {
-                url: item.link,
-                title: item.title
-              })
+              html: $.tmpl( template.posted, item )
             });
           }
         }
         callback(output);
       }
     });
-  };
-  $.fn.lifestream.feeds.deviantart.template = {
-    deviationpost: 'posted <a href="${url}">${title}</a>'
+
+    // Expose the template.
+    // We use this to check which templates are available
+    return {
+      "template" : template
+    };
+
   };
 
   $.fn.lifestream.feeds.dribbble = function( config, callback ) {
 
-    var parseDribbbleItem = function( item ) {
-      var output = 'posted a shot <a href="' + item.url + '">'
-        + item.title + "</a>";
-
-      return output;
-    };
+    var template = $.extend({},
+      {
+        posted: 'posted a shot <a href="${url}">${title}</a>'
+      },
+      config.template);
 
     $.ajax({
       url: "http://api.dribbble.com/players/" + config.user + "/shots",
@@ -288,7 +371,7 @@
             output.push({
               date: new Date(item.created_at),
               config: config,
-              html: parseDribbbleItem(item)
+              html: $.tmpl( template.posted, item )
             });
           }
         }
@@ -297,16 +380,21 @@
       }
     });
 
+    // Expose the template.
+    // We use this to check which templates are available
+    return {
+      "template" : template
+    };
+
   };
 
   $.fn.lifestream.feeds.flickr = function( config, callback ) {
 
-    var parseFlickrItem = function( item ) {
-      var output = 'posted a photo <a href="' + item.link + '">'
-        + item.title + "</a>";
-
-      return output;
-    };
+    var template = $.extend({},
+      {
+        posted: 'posted a photo <a href="${link}">${title}</a>'
+      },
+      config.template);
 
     $.ajax({
       url: "http://api.flickr.com/services/feeds/photos_public.gne?id="
@@ -321,9 +409,9 @@
           for( ; i<j; i++) {
             var item = data.items[i];
             output.push({
-              date: new Date(item.published),
+              date: new Date( item.published ),
               config: config,
-              html: parseFlickrItem(item)
+              html: $.tmpl( template.posted, item )
             });
           }
         }
@@ -332,13 +420,69 @@
       }
     });
 
+    // Expose the template.
+    // We use this to check which templates are available
+    return {
+      "template" : template
+    };
+
   };
 
-  $.fn.lifestream.feeds.forrst = function(  config, callback  ) {
-    var parseForrstItem = function(  item  ) {
-      return 'Posted a ' + item.post_type
-        + ' titled <a href="'+item.post_url+'">' + item.title + '</a>';
+  $.fn.lifestream.feeds.formspring = function( config, callback ) {
+
+    var template = $.extend({},
+      {
+        answered: 'answered a question <a href="${link}">${title}</a>'
+      },
+      config.template);
+
+    var parseFormspring = function ( input ) {
+      var output = [], list, i = 0, j, item;
+
+      if ( input.query && input.query.count && input.query.count > 0
+          && input.query.results.rss.channel.item ) {
+        list = input.query.results.rss.channel.item;
+        j = list.length;
+        for ( ; i < j; i++) {
+          item = list[i];
+
+          output.push({
+            date: new Date( item.pubDate ),
+            config: config,
+            html: $.tmpl( template.answered, item )
+          });
+        }
+      }
+
+      return output;
     };
+
+    $.ajax({
+      url: createYqlUrl('select * from xml where '
+        + 'url="http://www.formspring.me/profile/' + config.user + '.rss"'),
+      dataType: "jsonp",
+      success: function ( data ) {
+        callback(parseFormspring(data));
+      }
+    });
+
+    // Expose the template.
+    // We use this to check which templates are available
+    return {
+      "template" : template
+    };
+
+  };
+
+  $.fn.lifestream.feeds.forrst = function( config, callback ) {
+
+    var template = $.extend({},
+      {
+        posted: 'posted a ${post_type} '
+          + '<a href="${post_url}">${title}</a>'
+      },
+      config.template);
+
     $.ajax({
       url: "http://forrst.com/api/v2/users/posts?username=" + config.user,
       dataType: "jsonp",
@@ -351,34 +495,41 @@
             output.push({
               date: new Date( item.created_at.replace(' ', 'T') ),
               config: config,
-              html: parseForrstItem( item )
+              html: $.tmpl( template.posted, item )
             });
           }
         }
         callback( output );
       }
     });
+
+    // Expose the template.
+    // We use this to check which templates are available
+    return {
+      "template" : template
+    };
+
   };
 
   $.fn.lifestream.feeds.foursquare = function( config, callback ) {
 
-    var parseFoursquareStatus = function( item ) {
-      var output = 'checked in @ <a href="' + item.link + '">'
-        + item.title + "</a>";
+    var template = $.extend({},
+      {
+        checkedin: 'checked in @ <a href="${link}">${title}</a>'
+      },
+      config.template),
 
-      return output;
-    },
     parseFoursquare = function( input ) {
       var output = [], i = 0, j;
 
       if(input.query && input.query.count && input.query.count >0) {
         j = input.query.count;
         for( ; i<j; i++) {
-          var status = input.query.results.item[i];
+          var item = input.query.results.item[i];
           output.push({
-            date: new Date(status.pubDate),
+            date: new Date(item.pubDate),
             config: config,
-            html: parseFoursquareStatus(status)
+            html: $.tmpl( template.checkedin, item )
           });
         }
       }
@@ -396,51 +547,75 @@
       }
     });
 
+    // Expose the template.
+    // We use this to check which templates are available
+    return {
+      "template" : template
+    };
+
   };
 
   $.fn.lifestream.feeds.github = function( config, callback ) {
+
+    var template = $.extend({},
+      {
+        pushed: '<a href="${status.url}" title="{{if title}}${title} '
+          +'by ${author} {{/if}}">pushed</a> to '
+          +'<a href="http://github.com/${repo}">${repo}</a>',
+        gist: '<a href="${status.payload.url}" title="'
+          +'${status.payload.desc || ""}">${status.payload.name}</a>',
+        commented: '<a href="${status.url}">commented</a> on '
+          +'<a href="http://github.com/${repo}">${repo}</a>',
+        pullrequest: '<a href="${status.url}">${status.payload.action}</a> '
+          +'pull request on <a href="http://github.com/${repo}">${repo}</a>',
+        created: 'created ${status.payload.ref_type || status.payload.object}'
+          +' <a href="${status.url}">${status.payload.ref || '
+          +'status.payload.object_name}</a> for '
+          +'<a href="http://github.com/${repo}">${repo}</a>',
+        createdglobal: 'created ${status.payload.object} '
+          +'<a href="${status.url}">${title}</a>',
+        deleted: 'deleted ${status.payload.ref_type} '
+          +'<a href="http://github.com/${status.repository.owner}/'
+          +'${status.repository.name}">status.payload.ref</a>'
+      },
+      config.template);
 
     var returnRepo = function( status ) {
       return status.payload.repo || status.repository.owner + "/"
                                   + status.repository.name;
     },
     parseGithubStatus = function( status ) {
-      var output = "", name, repo, title, type;
+      var repo, title;
       if(status.type === "PushEvent") {
-        title = "";
+        title = status.payload && status.payload.shas
+          && status.payload.shas.json
+          && status.payload.shas.json[2];
         repo = returnRepo(status);
 
-        if(status.payload && status.payload.shas && status.payload.shas.json
-          && status.payload.shas.json[2]) {
-            title = status.payload.shas.json[2] + " by "
-                  + status.payload.shas.json[3];
-        }
-        output += '<a href="' + status.url + '" title="'+ title
-          +'">pushed</a> to '
-          + '<a href="http://github.com/'+repo
-          +'">' + repo + "</a>";
+        return $.tmpl( template.pushed, {
+          status: status,
+          title: title,
+          author: title ? status.payload.shas.json[3] : "",
+          repo: returnRepo(status)
+        } );
       }
       else if (status.type === "GistEvent") {
-        title = status.payload.desc || "";
-        output += status.payload.action + 'd '
-            + '<a href="'+status.payload.url
-            + '" title ="' + title
-            + '">' + status.payload.name + "</a>";
+        return $.tmpl( template.gist, status );
       }
       else if (status.type === "CommitCommentEvent" ||
                status.type === "IssueCommentEvent") {
         repo = returnRepo(status);
-        output += '<a href="' + status.url + '">commented</a> on '
-          + '<a href="http://github.com/'+ repo
-          +'">' + repo + "</a>";
+        return $.tmpl( template.commented, {
+          repo: repo,
+          status: status
+        } );
       }
       else if (status.type === "PullRequestEvent") {
-        repo = status.payload.repo || status.repository.owner + "/"
-                                    + status.repository.name;
-        output += '<a href="' + status.url + '">' + status.payload.action
-          + '</a> pull request on '
-          + '<a href="http://github.com/'+ repo
-          +'">' + repo + "</a>";
+        repo = returnRepo(status);
+        return $.tmpl( template.pullrequest, {
+          repo: repo,
+          status: status
+        } );
       }
       // Github has several syntaxes for create tag events
       else if (status.type === "CreateEvent" &&
@@ -448,32 +623,23 @@
                 status.payload.ref_type === "branch" ||
                 status.payload.object === "tag")) {
         repo = returnRepo(status);
-        type = status.payload.ref_type || status.payload.object;
-        name = status.payload.ref || status.payload.object_name;
-        output += 'created ' + type
-          +' <a href="' + status.url + '">'
-          + name
-          + '</a> for '
-          + '<a href="http://github.com/'+ repo
-          +'">' + repo + "</a>";
+        return $.tmpl( template.created, {
+          repo: repo,
+          status: status
+        } );
       }
       else if (status.type === "CreateEvent") {
-        name = (status.payload.object_name === "null")
+        title = (status.payload.object_name === "null")
           ? status.payload.name
           : status.payload.object_name;
-        output += 'created ' + status.payload.object
-          +' <a href="' + status.url + '">'
-          + name
-          + '</a>';
+        return $.tmpl( template.createdglobal, {
+          title: title,
+          status: status
+        } );
       }
       else if (status.type === "DeleteEvent") {
-        output += 'deleted ' + status.payload.ref_type
-          +' <a href="http://github.com/' + status.repository.owner + "/"
-          + status.repository.name + '">'
-          + status.payload.ref
-          + '</a>';
+        return $.tmpl( template.deleted, status );
       }
-      return output;
 
     },
     parseGithub = function( input ) {
@@ -506,15 +672,22 @@
       }
     });
 
+    // Expose the template.
+    // We use this to check which templates are available
+    return {
+      "template" : template
+    };
+
   };
 
   $.fn.lifestream.feeds.googlereader = function( config, callback ) {
 
-    var parseReaderEntry = function( entry ) {
-      return 'starred post <a href="' + entry.link.href + '">'
-        + entry.title.content
-        + "</a>";
-    },
+    var template = $.extend({},
+      {
+        starred: 'starred post <a href="${link.href}">${title.content}</a>'
+      },
+      config.template),
+
     /**
      * Parse the input from google reader
      */
@@ -525,11 +698,11 @@
         list = input.query.results.feed.entry;
         j = list.length;
         for( ; i<j; i++) {
-          var entry = list[i];
+          var item = list[i];
           output.push({
-            date: new Date(parseInt(entry["crawl-timestamp-msec"], 10)),
+            date: new Date(parseInt(item["crawl-timestamp-msec"], 10)),
             config: config,
-            html: parseReaderEntry(entry)
+            html: $.tmpl( template.starred, item )
           });
         }
       }
@@ -546,9 +719,22 @@
       }
     });
 
+    // Expose the template.
+    // We use this to check which templates are available
+    return {
+      "template" : template
+    };
+
   };
 
   $.fn.lifestream.feeds.iusethis = function( config, callback ) {
+
+    var template = $.extend({},
+      {
+        global: '${action} <a href="${link}">${what}</a> on (${os})'
+      },
+      config.template);
+
     var parseIusethis = function( input ) {
       var output = [], list, i, j, k, l, m = 0, n, item, title, actions,
         action, what, os, oss = ["iPhone", "OS X", "Windows"];
@@ -585,8 +771,12 @@
             output.push({
               date: new Date(item.pubDate),
               config: config,
-              html: action.toLowerCase() + ' <a href="' + item.link + '">'
-                + what[1] + '</a> (' + os + ')'
+              html: $.tmpl( template.global, {
+                action: action.toLowerCase(),
+                link: item.link,
+                what: what[1],
+                os: os
+              } )
             });
           }
         }
@@ -597,8 +787,10 @@
 
     $.ajax({
       url: createYqlUrl('select * from xml where '
-        + 'url="http://iphone.iusethis.com/user/feed.rss/' + config.user + '" or '
-        + 'url="http://osx.iusethis.com/user/feed.rss/' + config.user + '" or '
+        + 'url="http://iphone.iusethis.com/user/feed.rss/' + config.user
+        + '" or '
+        + 'url="http://osx.iusethis.com/user/feed.rss/' + config.user
+        + '" or '
         + 'url="http://win.iusethis.com/user/feed.rss/' + config.user + '"'),
       dataType: "jsonp",
       success: function( data ) {
@@ -606,18 +798,23 @@
       }
     });
 
+    // Expose the template.
+    // We use this to check which templates are available
+    return {
+      "template" : template
+    };
+
   };
 
   $.fn.lifestream.feeds.lastfm = function( config, callback ) {
-    var parseLastfmEntry = function( entry ) {
-      var output = "";
 
-      output +='loved <a href="'+ entry.url + '">'
-        + entry.name + '</a> by <a href="' + entry.artist.url + '">'
-        + entry.artist.name + "</a>";
+    var template = $.extend({},
+      {
+        loved: 'loved <a href="${url}">${name}</a> by '
+          + '<a href="${artist.url}">${artist.name}</a>'
+      },
+      config.template),
 
-      return output;
-    },
     parseLastfm = function( input ) {
       var output = [], list, i = 0, j;
 
@@ -627,11 +824,11 @@
         list = input.query.results.lovedtracks.track;
         j = list.length;
         for( ; i<j; i++) {
-          var entry = list[i];
+          var item = list[i];
           output.push({
-            date: new Date(parseInt((entry.date.uts * 1000), 10)),
+            date: new Date(parseInt((item.date.uts * 1000), 10)),
             config: config,
-            html: parseLastfmEntry(entry)
+            html: $.tmpl( template.loved, item )
           });
         }
       }
@@ -648,14 +845,21 @@
       }
     });
 
+    // Expose the template.
+    // We use this to check which templates are available
+    return {
+      "template" : template
+    };
+
   };
 
   $.fn.lifestream.feeds.picplz = function( config, callback ) {
-    var parsePicplzItem = function( item ) {
-      var imagename = item.caption || item.id;
-      return 'Uploaded <a href="' + item.pic_files["640r"].img_url + '">'
-        + imagename + '</a>';
-    };
+
+    var template = $.extend({},
+      {
+        uploaded: 'uploaded <a href="${url}">${title}</a>'
+      },
+      config.template);
 
     $.ajax({
       url: "http://picplz.com/api/v2/user.json?username="
@@ -671,16 +875,32 @@
             output.push({
               date: new Date( ( item.date ) * 1000 ),
               config: config,
-              html: parsePicplzItem( item )
+              html: $.tmpl( template.uploaded, {
+                url: item.pic_files["640r"].img_url,
+                title: item.caption || item.id
+                } )
             });
           }
         }
         callback( output );
       }
     });
+
+    // Expose the template.
+    // We use this to check which templates are available
+    return {
+      "template" : template
+    };
+
   };
 
   $.fn.lifestream.feeds.pinboard = function( config, callback ) {
+
+    var template = $.extend({},
+      {
+        bookmarked: 'bookmarked <a href="${link}">${title}</a>'
+      },
+      config.template);
 
     var parsePinboard = function( input ) {
       var output = [], list, i = 0, j, item;
@@ -694,8 +914,7 @@
           output.push({
             date: new Date(item.date),
             config: config,
-            html: 'added bookmark <a href="' + item.link + '">'
-              + item.title + '</a>'
+            html: $.tmpl( template.bookmarked, item )
           });
 
         }
@@ -713,35 +932,96 @@
       }
     });
 
+    // Expose the template.
+    // We use this to check which templates are available
+    return {
+      "template" : template
+    };
+
+  };
+
+  $.fn.lifestream.feeds.posterous = function( config, callback ) {
+
+    var template = $.extend({},
+      {
+        posted: 'posted <a href="${link}">${title}</a>'
+      },
+      config.template);
+
+    var parsePosterous = function ( input ) {
+      var output = [], list, i = 0, j, item;
+
+      if ( input.query && input.query.count && input.query.count > 0
+          && input.query.results.rss.channel.item ) {
+        list = input.query.results.rss.channel.item;
+        j = list.length;
+        for ( ; i < j; i++) {
+          item = list[i];
+
+          output.push({
+            date: new Date( item.pubDate ),
+            config: config,
+            html: $.tmpl( template.posted, item )
+          });
+        }
+      }
+
+      return output;
+    };
+
+    $.ajax({
+      url: createYqlUrl('select * from xml where '
+        + 'url="http://' + config.user + '.posterous.com/rss.xml"'),
+      dataType: "jsonp",
+      success: function ( data ) {
+        callback(parsePosterous(data));
+      }
+    });
+
+    // Expose the template.
+    // We use this to check which templates are available
+    return {
+      "template" : template
+    };
+
   };
 
   $.fn.lifestream.feeds.reddit = function( config, callback ) {
+
+    var template = $.extend({},
+      {
+        commented: '<a href="http://www.reddit.com/r/${item.data.subreddit}'
+          + '/comments/${item.data.link_id.substring(3)}/u/'
+          + '${item.data.name.substring(3)}?context=3">commented '
+          + '(${score})</a> in <a href="http://www.reddit.com/r/'
+          + '${item.data.subreddit}">${item.data.subreddit}</a>',
+        created: '<a href="http://www.reddit.com${item.data.permalink}">'
+          + 'created new thread (${score})</a> in '
+          + '<a href="http://www.reddit.com/r/${item.data.subreddit}">'
+          + '${item.data.subreddit}</a>'
+      },
+      config.template);
 
     /**
      * Parsed one item from the Reddit API.
      * item.kind == t1 is a reply, t2 is a new thread
      */
     var parseRedditItem = function( item ) {
+
+      var score = item.data.ups - item.data.downs,
+          pass = {
+            item: item,
+            score: (score > 0) ? "+" + score : score
+          };
+
       // t1 = reply, t3 = new thread
-      var output="",
-        thread_link = "",
-        subreddit_link = "http://www.reddit.com/r/" + item.data.subreddit,
-        score = item.data.ups - item.data.downs;
-      score = (score > 0) ? "+" + score : score;
       if (item.kind === "t1") {
-        thread_link = "http://www.reddit.com/r/" + item.data.subreddit
-              + "/comments/" + item.data.link_id.substring(3) + "/u/"
-              + item.data.name.substring(3) + "?context=3";
-        output += '<a href="' + thread_link + '">commented ('
-              + score +')</a> ';
+        return $.tmpl( template.commented, pass );
       }
       else if (item.kind === "t3") {
-        output += '<a href="http://www.reddit.com' + item.data.permalink
-                + '">created new thread (' + score +')</a> ';
+        return $.tmpl( template.created, pass );
       }
-      output += ' in <a href="' + subreddit_link + '">/r/'
-             + item.data.subreddit + '</a>';
-      return output;
+
     },
     /**
      * Reddit date's are simple epochs.
@@ -775,9 +1055,21 @@
       }
     });
 
+    // Expose the template.
+    // We use this to check which templates are available
+    return {
+      "template" : template
+    };
+
   };
 
   $.fn.lifestream.feeds.slideshare = function( config, callback ) {
+
+    var template = $.extend({},
+      {
+        uploaded: 'uploaded a presentation <a href="${link}">${title}</a>'
+      },
+      config.template);
 
     var parseSlideshare = function( input ) {
       var output = [], list, i = 0, j, item;
@@ -791,8 +1083,7 @@
           output.push({
             date: new Date(item.pubDate),
             config: config,
-            html: 'uploaded a presentation <a href="' + item.link + '">'
-              + item.title + '</a>'
+            html: $.tmpl( template.uploaded, item )
           });
 
         }
@@ -809,12 +1100,25 @@
         callback(parseSlideshare(data));
       }
     });
+
+    // Expose the template.
+    // We use this to check which templates are available
+    return {
+      "template" : template
+    };
+
   };
 
   $.fn.lifestream.feeds.stackoverflow = function( config, callback ) {
 
+    var template = $.extend({},
+      {
+        global: '<a href="${link}">${text}</a> - ${title}'
+      },
+      config.template);
+
     var parseStackoverflowItem = function( item ) {
-      var output="", text="", title="", link="",
+      var text="", title="", link="",
       stackoverflow_link = "http://stackoverflow.com/users/" + config.user,
       question_link = "http://stackoverflow.com/questions/";
 
@@ -832,9 +1136,11 @@
         title = item.detail || item.description || "";
         link = question_link + item.post_id;
       }
-      output += '<a href="' + link + '" title="' + title + '">'
-             + text + "</a> - " + title;
-      return output;
+      return {
+        link: link,
+        title: title,
+        text: text
+      };
     },
     convertDate = function( date ) {
       return new Date(date * 1000);
@@ -856,7 +1162,7 @@
             output.push({
               date: convertDate(item.creation_date),
               config: config,
-              html: parseStackoverflowItem(item)
+              html: $.tmpl( template.global, parseStackoverflowItem(item) )
             });
           }
         }
@@ -865,13 +1171,26 @@
       }
     });
 
+    // Expose the template.
+    // We use this to check which templates are available
+    return {
+      "template" : template
+    };
+
   };
 
   $.fn.lifestream.feeds.tumblr = function( config, callback ) {
+
+    var template = $.extend({},
+      {
+        posted: 'posted a ${type} <a href="${url}">${title}</a>'
+      },
+      config.template),
+
     /**
      * get title text
      */
-    var getTitle = function( post ) {
+    getTitle = function( post ) {
       var title = post["regular-title"]
         || post["quote-text"]
         || post["conversation-title"]
@@ -890,8 +1209,11 @@
       return {
         date: new Date(post.date),
         config: config,
-        html: 'posted a ' + post.type + ' <a href="' + post.url
-          + '">' + getTitle(post) + '</a>'
+        html: $.tmpl( template.posted, {
+            type: post.type,
+            url: post.url,
+            title: getTitle(post)
+          } )
       };
     },
     parseTumblr = function( input ) {
@@ -922,9 +1244,21 @@
       }
     });
 
+    // Expose the template.
+    // We use this to check which templates are available
+    return {
+      "template" : template
+    };
+
   };
 
   $.fn.lifestream.feeds.twitter = function( config, callback ) {
+
+    var template = $.extend({},
+      {
+        posted: '{{html tweet}}'
+      },
+      config.template),
 
     /**
      * Add links to the twitter feed.
@@ -933,7 +1267,7 @@
      * @param {String} tweet A string of a tweet
      * @return {String} A linkified tweet
      */
-    var linkify = function( tweet ) {
+    linkify = function( tweet ) {
 
       var link = function( t ) {
         return t.replace(
@@ -967,22 +1301,6 @@
       return hash(at(link(tweet)));
 
     },
-
-    /**
-     * Add clickable links to a tweet.
-     */
-    addTwitterLinks = function( tweet ) {
-      return linkify(tweet)
-        .replace(/ #([A-Za-z0-9\/\.]*)/g, function( m ) {
-            // Link # tags
-            return ' <a target="_new" href="http://twitter.com/search?q='
-              + m.replace(' #','%23') + '">' + m + "</a>";
-      }).replace(/@[\w]+/g, function( m ) {
-            // Link @username
-            return '<a href="http://www.twitter.com/'
-              + m.replace('@','') + '">' + m + "</a>";
-      });
-    },
     /**
      * Parse the input from twitter
      */
@@ -996,7 +1314,9 @@
           output.push({
             date: new Date(status.created_at),
             config: config,
-            html: addTwitterLinks(status.text)
+            html: $.tmpl( template.posted, {
+              tweet: linkify(status.text)
+            } )
           });
         }
       }
@@ -1012,15 +1332,22 @@
       }
     });
 
+    // Expose the template.
+    // We use this to check which templates are available
+    return {
+      "template" : template
+    };
+
   };
 
   $.fn.lifestream.feeds.vimeo = function( config, callback ) {
 
-    var parseVimeoItem = function( item ) {
-      return 'published a video <a href="' + item.url + '" title="'
-        + item.description.replace(/"/g, "'").replace( /<.+?>/gi, "")
-        + '">' + item.title + '</a>';
-    },
+    var template = $.extend({},
+      {
+        posted: 'posted <a href="${url}" title="${description}">${title}</a>'
+      },
+      config.template),
+
     parseVimeo = function( input ) {
       var output = [], i = 0, j, item;
 
@@ -1031,7 +1358,12 @@
           output.push({
             date: new Date( item.upload_date.replace(' ', 'T') ),
             config: config,
-            html: parseVimeoItem(item)
+            html: $.tmpl( template.posted, {
+              url: item.url,
+              description: item.description.replace(/"/g, "'")
+                                           .replace( /<.+?>/gi, ""),
+              title: item.title
+            } )
           });
         }
       }
@@ -1048,15 +1380,69 @@
       }
     });
 
+    // Expose the template.
+    // We use this to check which templates are available
+    return {
+      "template" : template
+    };
+
+  };
+
+  $.fn.lifestream.feeds.wordpress = function( config, callback ) {
+
+    var template = $.extend({},
+      {
+        posted: 'posted <a href="${link}">${title}</a>'
+      },
+      config.template);
+
+    var parseWordpress = function ( input ) {
+      var output = [], list, i = 0, j, item;
+
+      if ( input.query && input.query.count && input.query.count > 0
+          && input.query.results.rss.channel.item ) {
+        list = input.query.results.rss.channel.item;
+        j = list.length;
+        for ( ; i < j; i++) {
+          item = list[i];
+
+          output.push({
+            date: new Date( item.pubDate ),
+            config: config,
+            html: $.tmpl( template.posted, item )
+          });
+        }
+      }
+
+      return output;
+    };
+
+    $.ajax({
+      url: createYqlUrl('select * from xml where '
+        + 'url="http://' + config.user + '.wordpress.com/feed"'),
+      dataType: "jsonp",
+      success: function ( data ) {
+        callback(parseWordpress(data));
+      }
+    });
+
+    // Expose the template.
+    // We use this to check which templates are available
+    return {
+      "template" : template
+    };
+
   };
 
   $.fn.lifestream.feeds.youtube = function( config, callback ) {
 
-    var parseYoutubeItem = function( item ) {
-      return ' favorited <a href="' + item.video.player["default"] + '"'
-        + ' title="' + item.video.description + '">'
-        + item.video.title + "</a>";
-    },
+    var template = $.extend({},
+      {
+        favorited: 'favorited <a href="${video.player.default}" '
+          + 'title="${video.description}">${video.title}</a>'
+      },
+      config.template),
+
     parseYoutube = function( input ) {
       var output = [], i = 0, j, item;
 
@@ -1067,7 +1453,7 @@
           output.push({
             date: new Date(item.created),
             config: config,
-            html: parseYoutubeItem(item)
+            html: $.tmpl( template.favorited, item )
           });
         }
       }
@@ -1083,6 +1469,12 @@
         callback(parseYoutube(data));
       }
     });
+
+    // Expose the template.
+    // We use this to check which templates are available
+    return {
+      "template" : template
+    };
 
   };
 

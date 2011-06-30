@@ -12,13 +12,15 @@ Check out [the example][example] or create [your own lifestream][melifestream] i
 
 ## Supported feeds
 
-Currently supports the following feeds natively:
+Currently supports the following feeds:
 
+* [Blogger](http://blogger.com)
 * [Dailymotion](http://dailymotion.com)
 * [Delicious](http://delicious.com)
 * [DeviantART](http://deviantart.com)
 * [Dribbble](http://dribbble.com)
 * [Flickr](http://flickr.com)
+* [Formspring](http://formspring.com)
 * [Forrst](http://forrst.com)
 * [Foursquare](http://foursquare.com)
 * [Github](http://github.com)
@@ -27,12 +29,14 @@ Currently supports the following feeds natively:
 * [Last.fm](http://last.fm)
 * [PicPlz](http://picplz.com)
 * [Pinboard](http://pinboard.com)
+* [Posterous](http://posterous.com)
 * [Reddit](http://reddit.com)
 * [Slideshare](http://slideshare.com)
 * [Stackoverflow](http://stackoverflow.com)
 * [Tumblr](http://tumblr.com)
 * [Twitter](http://twitter.com)
 * [Vimeo](http://vimeo.com)
+* [Wordpress](http://wordpress.com)
 * [Youtube](http://youtube.com)
 
 Feel free to fork the project and add your own feeds in.  
@@ -40,21 +44,21 @@ Just send a pull request to [christianv/jquery-lifestream][jquery-lifestream] wh
 
 ## Usage
 
-Add the following to the <head> or <body> tag of your HTML page.
+Add the following to the &lt;head&gt; or &lt;body&gt; tag of your HTML page.
 
 ``` html
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
-<script src="https://github.com/christianv/jquery-lifestream/raw/master/jquery.lifestream-compiled.js"></script>
+<script src="https://raw.github.com/christianv/jquery-lifestream/master/jquery.lifestream-compiled.js"></script>
 <script>
   $("#lifestream").lifestream({
-    "list":[
+    list:[
       {
-        "service": "github",
-        "user": "christianv"
+        service: "github",
+        user: "christianv"
       },
       {
-        "service": "twitter",
-        "user": "denbuzze"
+        service: "twitter",
+        user: "denbuzze"
       }
     ]
   });
@@ -87,19 +91,25 @@ The plug-in accepts one configuration JSON object:
 
 ``` javascript
 $("#lifestream").lifestream({
-  "limit": 30,
-  "list":[
+  classname: "lifestream",
+  feedloaded: feedcallback,
+  limit: 30,
+  list:[
     {
-      "service": "github",
-      "user": "christianv"
+      service: "github",
+      user: "christianv"
     },
     {
-      "service": "twitter",
-      "user": "denbuzze"
+      service: "twitter",
+      user: "denbuzze"
     }
   ]
 });
 ```
+
+`classname`: The name of the main lifestream class. We use this for the main ul class e.g. lifestream and for the specific feeds e.g. lifestream-twitter
+
+`feedloaded`: (_function_) A callback function which is triggered each time a feed was loaded.
 
 `limit`: (_integer_) Specify how many elements you want in your lifestream (default = 10).
 
@@ -161,6 +171,7 @@ Special thanks all the [committers](https://raw.github.com/christianv/jquery-lif
 
 ## Version log
 
+* 0.1.1 Blogger, Formspring, Posterous & Wordpress support
 * 0.1.0 jQuery Template support
 * 0.0.17 Forrst & PicPlz support
 * 0.0.16 Iusethis support
