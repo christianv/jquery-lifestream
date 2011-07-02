@@ -28,13 +28,24 @@
     // Make the plug-in chainable
     return this.each(function() {
 
-			var dayLimitValues = ['today', '1day'],
+			var dayLimitValues = ['today', '1day', '2days', '3days', '7days', 
+			                      '15days', '30days'],
 
 					isAcceptedLimit = ( config.dayLimit && 
-                          $.inArray(config.dayLimit, dayLimitValues) > -1 ),
+                            $.inArray(config.dayLimit, dayLimitValues) > -1 ),
+
+          isLimitedToToday = ( config.dayLimit.indexOf('today') > -1 || 
+                             config.dayLimit.indexOf('1day') > -1 ),
 
 					dateLimit = new Date();
 			dateLimit.setHours(0,0,0,0);
+
+      if ( isAcceptedLimit && !isLimitedToToday ) {
+        var nbDays = parseInt(config.dayLimit.split('days')[0], 10);
+        var now = dateLimit.getDate();
+
+        dateLimit.setDate( now - (nbDays-1) );
+      }
 
       // The element where the lifestream is linked to
       var outputElement = $(this),
