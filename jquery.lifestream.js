@@ -33,7 +33,7 @@
 			                      '30days'],
 
 					isAcceptedLimit = ( config.dateLimit && 
-                            $.inArray(config.dateLimit, dateLimitValues) > -1 ),
+                          $.inArray(config.dateLimit, dateLimitValues) > -1 ),
 
           isLimitedToToday = ( config.dateLimit && 
                               (config.dateLimit.indexOf('today') > -1 || 
@@ -133,7 +133,8 @@
         for ( ; i < length; i++ ) {
           item = items[i];
           itemDate = item.date.setHours(0,0,0,0);
-          if ( item.html && (!settings.dateLimit || !isAcceptedLimit || 
+          if ( item.html && 
+               (!settings.dateLimit || !isAcceptedLimit || 
                (isAcceptedLimit && itemDate >= dateLimit.getTime())) ) {
             $('<li class="'+ settings.classname + '-'
               + item.config.service + '">').append( item.html )
