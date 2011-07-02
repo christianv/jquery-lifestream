@@ -28,15 +28,16 @@
     // Make the plug-in chainable
     return this.each(function() {
 
-			var dayLimitValues = ['today', '1day', 'yesterday', '2days', '3days',
+			var dateLimitValues = ['today', '1day', 'yesterday', '2days', '3days',
 			                      '1week', '7days', '2weeks', '15days', '1month',
 			                      '30days'],
 
-					isAcceptedLimit = ( config.dayLimit && 
-                            $.inArray(config.dayLimit, dayLimitValues) > -1 ),
+					isAcceptedLimit = ( config.dateLimit && 
+                            $.inArray(config.dateLimit, dateLimitValues) > -1 ),
 
-          isLimitedToToday = ( config.dayLimit.indexOf('today') > -1 || 
-                             config.dayLimit.indexOf('1day') > -1 ),
+          isLimitedToToday = ( config.dateLimit && 
+                              config.dateLimit.indexOf('today') > -1 || 
+                              config.dateLimit.indexOf('1day') > -1 ),
 
 					dateLimit = new Date();
 			dateLimit.setHours(0,0,0,0);
@@ -44,7 +45,7 @@
       if ( isAcceptedLimit && !isLimitedToToday ) {
         var nbDays, now;
 
-        switch ( config.dayLimit ) {
+        switch ( config.dateLimit ) {
           case 'yesterday':
             nbDays = 2;
             break;
@@ -58,7 +59,7 @@
             nbDays = 30;
             break;
           default:
-            nbDays = parseInt(config.dayLimit.split('days')[0], 10);
+            nbDays = parseInt(config.dateLimit.split('days')[0], 10);
             break;
         }
 
@@ -132,7 +133,7 @@
         for ( ; i < length; i++ ) {
           item = items[i];
           itemDate = item.date.setHours(0,0,0,0);
-          if ( item.html && (!settings.dayLimit || !isAcceptedLimit || 
+          if ( item.html && (!settings.dateLimit || !isAcceptedLimit || 
                (isAcceptedLimit && itemDate >= dateLimit.getTime())) ) {
             $('<li class="'+ settings.classname + '-'
               + item.config.service + '">').append( item.html )
