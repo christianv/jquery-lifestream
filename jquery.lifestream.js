@@ -28,8 +28,9 @@
     // Make the plug-in chainable
     return this.each(function() {
 
-			var dayLimitValues = ['today', '1day', '2days', '3days', '7days', 
-			                      '15days', '30days'],
+			var dayLimitValues = ['today', '1day', 'yesterday', '2days', '3days',
+			                      '1week', '7days', '2weeks', '15days', '1month',
+			                      '30days'],
 
 					isAcceptedLimit = ( config.dayLimit && 
                             $.inArray(config.dayLimit, dayLimitValues) > -1 ),
@@ -41,9 +42,27 @@
 			dateLimit.setHours(0,0,0,0);
 
       if ( isAcceptedLimit && !isLimitedToToday ) {
-        var nbDays = parseInt(config.dayLimit.split('days')[0], 10);
-        var now = dateLimit.getDate();
+        var nbDays, now;
 
+        switch ( config.dayLimit ) {
+          case 'yesterday':
+            nbDays = 2;
+            break;
+          case '1week':
+            nbDays = 7;
+            break;
+          case '2weeks':
+            nbDays = 15;
+            break;
+          case '1month':
+            nbDays = 30;
+            break;
+          default:
+            nbDays = parseInt(config.dayLimit.split('days')[0], 10);
+            break;
+        }
+
+        now = dateLimit.getDate();
         dateLimit.setDate( now - (nbDays-1) );
       }
 
