@@ -36,8 +36,8 @@
                             $.inArray(config.dateLimit, dateLimitValues) > -1 ),
 
           isLimitedToToday = ( config.dateLimit && 
-                              config.dateLimit.indexOf('today') > -1 || 
-                              config.dateLimit.indexOf('1day') > -1 ),
+                              (config.dateLimit.indexOf('today') > -1 || 
+                              config.dateLimit.indexOf('1day') > -1) ),
 
 					dateLimit = new Date();
 			dateLimit.setHours(0,0,0,0);
