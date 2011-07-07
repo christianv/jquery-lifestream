@@ -184,6 +184,18 @@
         for ( ; i < j; i++) {
           item = list[i];
 
+          if(!item.origLink) {
+            for (var n = 0; n < item.link.length; n++) {
+              if(item.link[n].rel == 'alternate')
+                item.origLink = item.link[n].href;
+            }
+            // ignore items that have no link.
+            if(!item.origLink) continue;
+          }
+          if(item.title.content) {
+            item.title = item.title.content;
+          }
+
           output.push({
             date: new Date( item.published ),
             config: config,
@@ -635,7 +647,9 @@
         } );
       }
       else if (status.type === "GistEvent") {
-        return $.tmpl( template.gist, status );
+        return $.tmpl( template.gist, {
+          status: status
+        });
       }
       else if (status.type === "CommitCommentEvent" ||
                status.type === "IssueCommentEvent") {
