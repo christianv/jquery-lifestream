@@ -28,6 +28,45 @@
     // Make the plug-in chainable
     return this.each(function() {
 
+			var dateLimitValues = ['today', '1day', 'yesterday', '2days', '3days',
+			                      '1week', '7days', '2weeks', '15days', '1month',
+			                      '30days'],
+
+					isAcceptedLimit = ( config.dateLimit && 
+                          $.inArray(config.dateLimit, dateLimitValues) > -1 ),
+
+          isLimitedToToday = ( config.dateLimit && 
+                              (config.dateLimit.indexOf('today') > -1 || 
+                              config.dateLimit.indexOf('1day') > -1) ),
+
+					dateLimit = new Date();
+			dateLimit.setHours(0,0,0,0);
+
+      if ( isAcceptedLimit && !isLimitedToToday ) {
+        var nbDays, now;
+
+        switch ( config.dateLimit ) {
+          case 'yesterday':
+            nbDays = 2;
+            break;
+          case '1week':
+            nbDays = 7;
+            break;
+          case '2weeks':
+            nbDays = 15;
+            break;
+          case '1month':
+            nbDays = 30;
+            break;
+          default:
+            nbDays = parseInt(config.dateLimit.split('days')[0], 10);
+            break;
+        }
+
+        now = dateLimit.getDate();
+        dateLimit.setDate( now - (nbDays-1) );
+      }
+
       // The element where the lifestream is linked to
       var outputElement = $(this),
 
@@ -83,7 +122,7 @@
             length = ( items.length < settings.limit ) ?
               items.length :
               settings.limit,
-            i = 0, item,
+            i = 0, item, itemDate,
 
             // We create an unordered list which will create all the feed
             // items
@@ -93,12 +132,15 @@
         // unordered list
         for ( ; i < length; i++ ) {
           item = items[i];
-          if ( item.html ) {
+          itemDate = item.date.setHours(0,0,0,0);
+          if ( item.html && 
+               (!settings.dateLimit || !isAcceptedLimit || 
+               (isAcceptedLimit && itemDate >= dateLimit.getTime())) ) {
             $('<li class="'+ settings.classname + '-'
               + item.config.service + '">').append( item.html )
                                            .appendTo( ul );
-          }
         }
+      }
 
         // Change the innerHTML with a list of all the feeditems in
         // chronological order
