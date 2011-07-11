@@ -1,12 +1,12 @@
 /*!
  * jQuery Lifestream Plug-in
- * @version 0.1.1
+ * @version 0.1.5
  * Show a stream of your online activity
  *
  * Copyright 2011, Christian Vuerings - http://denbuzze.com
  */
 /*globals jQuery, $ */
-(function( $ ){
+;(function( $ ){
 
   /**
    * Create a valid YQL URL by passing in a query
@@ -137,7 +137,8 @@
                (!settings.dateLimit || !isAcceptedLimit || 
                (isAcceptedLimit && itemDate >= dateLimit.getTime())) ) {
             $('<li class="'+ settings.classname + '-'
-              + item.config.service + '">').append( item.html )
+              + item.config.service + '">').data( "time", item.date )
+                                           .append( item.html )
                                            .appendTo( ul );
         }
       }
@@ -217,7 +218,7 @@
       config.template),
 
     parseBlogger = function ( input ) {
-      var output = [], list, i = 0, j, item;
+      var output = [], list, i = 0, j, item, k, l;
 
       if ( input.query && input.query.count && input.query.count > 0
           && input.query.results.feed.entry ) {
@@ -226,11 +227,27 @@
         for ( ; i < j; i++) {
           item = list[i];
 
-          output.push({
-            date: new Date( item.published ),
-            config: config,
-            html: $.tmpl( template.posted, item )
-          });
+          if( !item.origLink ) {
+            k = 0;
+            l = item.link.length;
+            for ( ; k < l ; k++ ) {
+              if( item.link[k].rel === 'alternate' ) {
+                item.origLink = item.link[k].href;
+              }
+            }
+          }
+          // ignore items that have no link.
+          if ( item.origLink ){
+            if( item.title.content ) {
+              item.title = item.title.content;
+            }
+
+            output.push({
+              date: new Date( item.published ),
+              config: config,
+              html: $.tmpl( template.posted, item )
+            });
+          }
         }
       }
 
@@ -460,6 +477,49 @@
 
   };
 
+	$.fn.lifestream.feeds.foomark = function( config, callback ) {
+
+	  var template = $.extend({},
+
+	    {
+	      bookmarked: 'bookmarked <a href="${url}">${url}</a>'
+
+	    },
+	    config.template);
+
+	  $.ajax({
+	    url: "http://api.foomark.com/urls/list/",
+	    data: {
+	      format: "jsonp",
+	      username: config.user
+	    },
+	    dataType: "jsonp",
+	    success: function( data ) {
+
+	      var output = [], i=0, j;
+	      if( data && data.length && data.length > 0 ) {
+	        j = data.length;
+	        for( ; i < j; i++ ) {
+	          var item = data[i];
+	          output.push({
+	            date: new Date( item.created_at.replace(' ', 'T') ),
+	            config: config,
+	            html: $.tmpl( template.bookmarked, item )
+	          });
+	        }
+	      }
+	      callback( output );
+	    }
+	  });
+
+	  // Expose the template.
+	  // We use this to check which templates are available
+	  return {
+	    "template" : template
+	  };
+
+	};
+
   $.fn.lifestream.feeds.formspring = function( config, callback ) {
 
     var template = $.extend({},
@@ -592,32 +652,37 @@
     var template = $.extend({},
       {
         pushed: '<a href="${status.url}" title="{{if title}}${title} '
-          +'by ${author} {{/if}}">pushed</a> to '
+          +'by ${author} {{/if}}">pushed</a> to <a href="http://github.com/'
+          +'${repo}/tree/${branchname}">${branchname}</a> at '
           +'<a href="http://github.com/${repo}">${repo}</a>',
         gist: '<a href="${status.payload.url}" title="'
           +'${status.payload.desc || ""}">${status.payload.name}</a>',
-        commented: '<a href="${status.url}">commented</a> on '
+        commented: 'commented on <a href="${status.url}">${what}</a> on '
           +'<a href="http://github.com/${repo}">${repo}</a>',
-        pullrequest: '<a href="${status.url}">${status.payload.action}</a> '
-          +'pull request on <a href="http://github.com/${repo}">${repo}</a>',
+        pullrequest: '${status.payload.action} <a href="${status.url}">'
+          +'pull request #${status.payload.number}</a> on '
+          +'<a href="http://github.com/${repo}">${repo}</a>',
         created: 'created ${status.payload.ref_type || status.payload.object}'
           +' <a href="${status.url}">${status.payload.ref || '
           +'status.payload.object_name}</a> for '
           +'<a href="http://github.com/${repo}">${repo}</a>',
         createdglobal: 'created ${status.payload.object} '
           +'<a href="${status.url}">${title}</a>',
-        deleted: 'deleted ${status.payload.ref_type} '
-          +'<a href="http://github.com/${status.repository.owner}/'
-          +'${status.repository.name}">status.payload.ref</a>'
+        deleted: 'deleted ${status.payload.ref_type} ${status.payload.ref} '
+          +'at <a href="http://github.com/${status.repository.owner}/'
+          +'${status.repository.name}">${status.repository.owner}/'
+          +'${status.repository.name}</a>'
       },
       config.template);
 
     var returnRepo = function( status ) {
-      return status.payload.repo || status.repository.owner + "/"
-                                  + status.repository.name;
+      return status.payload.repo
+        || ( status.repository ? status.repository.owner + "/"
+          + status.repository.name : null )
+        || status.url.split("/")[3] + "/" + status.url.split("/")[4];
     },
     parseGithubStatus = function( status ) {
-      var repo, title;
+      var repo, title, what;
       if(status.type === "PushEvent") {
         title = status.payload && status.payload.shas
           && status.payload.shas.json
@@ -628,16 +693,30 @@
           status: status,
           title: title,
           author: title ? status.payload.shas.json[3] : "",
+          branchname: status.payload.ref.split('/')[2],
           repo: returnRepo(status)
         } );
       }
       else if (status.type === "GistEvent") {
-        return $.tmpl( template.gist, status );
+        return $.tmpl( template.gist, {
+          status: status
+        } );
       }
-      else if (status.type === "CommitCommentEvent" ||
-               status.type === "IssueCommentEvent") {
+      else if (status.type === "CommitCommentEvent") {
+        what = 'commit ' 
+             + status.url.split('commit/')[1].split('#')[0].substring(0, 7);
         repo = returnRepo(status);
         return $.tmpl( template.commented, {
+          what: what,
+          repo: repo,
+          status: status
+        } );
+      }
+      else if (status.type === "IssueCommentEvent") {
+        what = 'issue ' + status.url.split('issues/')[1].split('#')[0];
+        repo = returnRepo(status);
+        return $.tmpl( template.commented, {
+          what: what,
           repo: repo,
           status: status
         } );
@@ -670,7 +749,9 @@
         } );
       }
       else if (status.type === "DeleteEvent") {
-        return $.tmpl( template.deleted, status );
+        return $.tmpl( template.deleted, {
+          status: status
+        } );
       }
 
     },
@@ -748,6 +829,51 @@
       dataType: 'jsonp',
       success: function( data ) {
         callback(parseReader(data));
+      }
+    });
+
+    // Expose the template.
+    // We use this to check which templates are available
+    return {
+      "template" : template
+    };
+
+  };
+
+  $.fn.lifestream.feeds.instapaper = function( config, callback ) {
+    var template = $.extend({},
+      {
+        loved: 'loved <a href="${link}">${title}</a>'
+      },
+      config.template),
+
+    parseInstapaper = function( input ) {
+      var output = [], list, i = 0, j, item;
+
+      if(input.query && input.query.count && input.query.count > 0
+          && input.query.results.rss.channel.item) {
+
+        list = input.query.results.rss.channel.item;
+        j = list.length;
+        for( ; i<j; i++) {
+          item = list[i];
+          output.push({
+            date: new Date( item.pubDate ),
+            config: config,
+            html: $.tmpl( template.loved, item )
+          });
+        }
+      }
+      return output;
+    };
+
+    $.ajax({
+      url: createYqlUrl('select * from xml where url='
+        + '"http://www.instapaper.com/starred/rss/'
+        + config.user + '"'),
+      dataType: 'jsonp',
+      success: function( data ) {
+        callback(parseInstapaper(data));
       }
     });
 
@@ -874,6 +1000,52 @@
       dataType: 'jsonp',
       success: function( data ) {
         callback(parseLastfm(data));
+      }
+    });
+
+    // Expose the template.
+    // We use this to check which templates are available
+    return {
+      "template" : template
+    };
+
+  };
+
+  $.fn.lifestream.feeds.mlkshk = function( config, callback ) {
+
+    var template = $.extend({},
+      {
+        posted: 'posted <a href="${link}">${title}</a>'
+      },
+      config.template);
+
+
+    var parseMlkshk = function ( input ) {
+
+      var output = [], list, i = 0, j, item;
+
+      if ( input.query && input.query.count && input.query.count > 0
+          && input.query.results.rss.channel.item ) {
+        list = input.query.results.rss.channel.item;
+        j = list.length;
+        for ( ; i < j; i++) {
+          item = list[i];
+          output.push({
+            date: new Date( item.pubDate ),
+            config: config,
+            html: $.tmpl( template.posted, item )
+          });
+        }
+      }
+      return output;
+    };
+
+    $.ajax({
+      url: createYqlUrl('select * from xml where '
+        + 'url="http://mlkshk.com/user/' + config.user + '/rss"'),
+      dataType: "jsonp",
+      success: function ( data ) {
+        callback(parseMlkshk(data));
       }
     });
 
@@ -1138,6 +1310,46 @@
     return {
       "template" : template
     };
+
+  };
+
+  $.fn.lifestream.feeds.snipplr = function( config, callback ) {
+
+    var template = $.extend({},
+      {
+        posted: 'posted a snippet <a href="${link}">${title}</a>'
+      },
+      config.template);
+
+    var parseSnipplr = function ( input ) {
+      var output = [], list, i = 0, j, item;
+
+      if ( input.query && input.query.count && input.query.count > 0
+          && input.query.results.rss.channel.item ) {
+        list = input.query.results.rss.channel.item;
+        j = list.length;
+        for ( ; i < j; i++) {
+          item = list[i];
+
+          output.push({
+            date: new Date( item.pubDate ),
+            config: config,
+            html: $.tmpl( template.posted, item )
+          });
+        }
+      }
+
+      return output;
+    };
+
+    $.ajax({
+      url: createYqlUrl('select * from xml where '
+        + 'url="http://snipplr.com/rss/users/' + config.user + '"'),
+      dataType: "jsonp",
+      success: function ( data ) {
+        callback(parseSnipplr(data));
+      }
+    });
 
   };
 
