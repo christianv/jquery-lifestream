@@ -96,7 +96,7 @@
           if ( item.html ) {
             $('<li class="'+ settings.classname + '-'
               + item.config.service + '">').data( "time", item.date )
-                                           .append( item.html )
+										   .append( item.html )
                                            .appendTo( ul );
           }
         }
@@ -203,7 +203,7 @@
             output.push({
               date: new Date( item.published ),
               config: config,
-              html: $.tmpl( template.posted, item )
+              html: $.tmpl( config.user + " " + template.posted, item )
             });
           }
         }
@@ -250,7 +250,7 @@
           output.push({
             date: new Date ( item.pubDate ),
             config: config,
-            html: $.tmpl( template.uploaded, item )
+            html: $.tmpl( config.user + " " + template.uploaded, item )
           });
         }
       }
@@ -296,7 +296,7 @@
             output.push({
               date: new Date(item.dt),
               config: config,
-              html: $.tmpl( template.bookmarked, item )
+              html: $.tmpl( config.user + " " + template.bookmarked, item )
             });
           }
         }
@@ -341,7 +341,7 @@
             output.push({
               date: new Date(item.pubDate),
               config: config,
-              html: $.tmpl( template.posted, item )
+              html: $.tmpl( config.user + " " + template.posted, item )
             });
           }
         }
@@ -378,7 +378,7 @@
             output.push({
               date: new Date(item.created_at),
               config: config,
-              html: $.tmpl( template.posted, item )
+              html: $.tmpl( config.user + " " + template.posted, item )
             });
           }
         }
@@ -418,7 +418,7 @@
             output.push({
               date: new Date( item.published ),
               config: config,
-              html: $.tmpl( template.posted, item )
+              html: $.tmpl( config.user + " " + template.posted, item )
             });
           }
         }
@@ -462,7 +462,7 @@
 	          output.push({
 	            date: new Date( item.created_at.replace(' ', 'T') ),
 	            config: config,
-	            html: $.tmpl( template.bookmarked, item )
+	            html: $.tmpl( config.user + " " + template.bookmarked, item )
 	          });
 	        }
 	      }
@@ -499,7 +499,7 @@
           output.push({
             date: new Date( item.pubDate ),
             config: config,
-            html: $.tmpl( template.answered, item )
+            html: $.tmpl( config.user + " " + template.answered, item )
           });
         }
       }
@@ -545,7 +545,7 @@
             output.push({
               date: new Date( item.created_at.replace(' ', 'T') ),
               config: config,
-              html: $.tmpl( template.posted, item )
+              html: $.tmpl( config.user + " " + template.posted, item )
             });
           }
         }
@@ -579,7 +579,7 @@
           output.push({
             date: new Date(item.pubDate),
             config: config,
-            html: $.tmpl( template.checkedin, item )
+            html: $.tmpl( config.user + " " + template.checkedin, item )
           });
         }
       }
@@ -773,7 +773,7 @@
           output.push({
             date: new Date(parseInt(item["crawl-timestamp-msec"], 10)),
             config: config,
-            html: $.tmpl( template.starred, item )
+            html: $.tmpl( config.user + " " + template.starred, item )
           });
         }
       }
@@ -818,7 +818,7 @@
           output.push({
             date: new Date( item.pubDate ),
             config: config,
-            html: $.tmpl( template.loved, item )
+            html: $.tmpl( config.user + " " + template.loved, item )
           });
         }
       }
@@ -887,7 +887,7 @@
             output.push({
               date: new Date(item.pubDate),
               config: config,
-              html: $.tmpl( template.global, {
+              html: $.tmpl( config.user + " " + template.global, {
                 action: action.toLowerCase(),
                 link: item.link,
                 what: what[1],
@@ -944,7 +944,7 @@
           output.push({
             date: new Date(parseInt((item.date.uts * 1000), 10)),
             config: config,
-            html: $.tmpl( template.loved, item )
+            html: $.tmpl( config.user + " " + template.loved, item )
           });
         }
       }
@@ -991,7 +991,7 @@
           output.push({
             date: new Date( item.pubDate ),
             config: config,
-            html: $.tmpl( template.posted, item )
+            html: $.tmpl( config.user + " " + template.posted, item )
           });
         }
       }
@@ -1037,7 +1037,7 @@
             output.push({
               date: new Date( ( item.date ) * 1000 ),
               config: config,
-              html: $.tmpl( template.uploaded, {
+              html: $.tmpl( config.user + " " + template.uploaded, {
                 url: item.pic_files["640r"].img_url,
                 title: item.caption || item.id
                 } )
@@ -1076,7 +1076,7 @@
           output.push({
             date: new Date(item.date),
             config: config,
-            html: $.tmpl( template.bookmarked, item )
+            html: $.tmpl( config.user + " " + template.bookmarked, item )
           });
 
         }
@@ -1123,7 +1123,7 @@
           output.push({
             date: new Date( item.pubDate ),
             config: config,
-            html: $.tmpl( template.posted, item )
+            html: $.tmpl( config.user + " " + template.posted, item )
           });
         }
       }
@@ -1178,10 +1178,10 @@
 
       // t1 = reply, t3 = new thread
       if (item.kind === "t1") {
-        return $.tmpl( template.commented, pass );
+        return $.tmpl( config.user + " " + template.commented, pass );
       }
       else if (item.kind === "t3") {
-        return $.tmpl( template.created, pass );
+        return $.tmpl( config.user + " " + template.created, pass );
       }
 
     },
@@ -1245,7 +1245,7 @@
           output.push({
             date: new Date(item.pubDate),
             config: config,
-            html: $.tmpl( template.uploaded, item )
+            html: $.tmpl( config.user + " " + template.uploaded, item )
           });
 
         }
@@ -1292,7 +1292,7 @@
           output.push({
             date: new Date( item.pubDate ),
             config: config,
-            html: $.tmpl( template.posted, item )
+            html: $.tmpl( config.user + " " + template.posted, item )
           });
         }
       }
@@ -1364,7 +1364,7 @@
             output.push({
               date: convertDate(item.creation_date),
               config: config,
-              html: $.tmpl( template.global, parseStackoverflowItem(item) )
+              html: $.tmpl( config.user + " " + template.global, parseStackoverflowItem(item) )
             });
           }
         }
@@ -1411,7 +1411,7 @@
       return {
         date: new Date(post.date),
         config: config,
-        html: $.tmpl( template.posted, {
+        html: $.tmpl( config.user + " " + template.posted, {
             type: post.type,
             url: post.url,
             title: getTitle(post)
@@ -1516,7 +1516,7 @@
           output.push({
             date: new Date(status.created_at),
             config: config,
-            html: $.tmpl( template.posted, {
+            html: $.tmpl( config.user + " " + template.posted, {
               tweet: linkify(status.text)
             } )
           });
@@ -1560,7 +1560,7 @@
           output.push({
             date: new Date( item.upload_date.replace(' ', 'T') ),
             config: config,
-            html: $.tmpl( template.posted, {
+            html: $.tmpl( config.user + " " + template.posted, {
               url: item.url,
               description: item.description.replace(/"/g, "'")
                                            .replace( /<.+?>/gi, ""),
@@ -1611,7 +1611,7 @@
           output.push({
             date: new Date( item.pubDate ),
             config: config,
-            html: $.tmpl( template.posted, item )
+            html: $.tmpl( config.user + " " + template.posted, item )
           });
         }
       }
@@ -1655,7 +1655,7 @@
           output.push({
             date: new Date(item.created),
             config: config,
-            html: $.tmpl( template.favorited, item )
+            html: $.tmpl( config.user + " " + template.favorited, item )
           });
         }
       }
