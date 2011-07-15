@@ -28,43 +28,46 @@
     // Make the plug-in chainable
     return this.each(function() {
 
-			var dateLimitValues = ['today', '1day', 'yesterday', '2days', '3days',
-			                      '1week', '7days', '2weeks', '15days', '1month',
-			                      '30days'],
+			var humanReadableLimits = [ 'today', 'yesterday' ],
 
-					isAcceptedLimit = ( config.dateLimit && 
-                          $.inArray(config.dateLimit, dateLimitValues) > -1 ),
+					isGoodLimitFormat = ( config.datelimit && config.datelimit.match(
+					/^((1\s*(day|week|month))|([1-9]+[0-9]*\s*(days|weeks|months)))$/i)
+					!== null ),
 
-          isLimitedToToday = ( config.dateLimit && 
-                              (config.dateLimit.indexOf('today') > -1 || 
-                              config.dateLimit.indexOf('1day') > -1) ),
+					isAcceptedLimit = ( config.datelimit && (isGoodLimitFormat ||
+					          $.inArray(config.datelimit, humanReadableLimits) > -1) ),
+
+					isLimitedToToday = ( config.datelimit &&
+                              (config.datelimit.indexOf('today') > -1 ||
+                              config.datelimit.indexOf('1day') > -1) ),
 
 					dateLimit = new Date();
 			dateLimit.setHours(0,0,0,0);
 
       if ( isAcceptedLimit && !isLimitedToToday ) {
-        var nbDays, now;
+        var gap, currentDay, currentMonth;
+        currentDay = dateLimit.getDate();
 
-        switch ( config.dateLimit ) {
-          case 'yesterday':
-            nbDays = 2;
-            break;
-          case '1week':
-            nbDays = 7;
-            break;
-          case '2weeks':
-            nbDays = 15;
-            break;
-          case '1month':
-            nbDays = 30;
+        switch ( config.datelimit ) {
+          case humanReadableLimits[0]:
+            dateLimit.setDate( currentDay - 1 );
             break;
           default:
-            nbDays = parseInt(config.dateLimit.split('days')[0], 10);
+            if ( config.datelimit.indexOf('days') > -1 ) {
+              gap = parseInt( config.datelimit.split('days')[0], 10 );
+              dateLimit.setDate( currentDay - gap );
+            }
+            else if ( config.datelimit.indexOf('week') > -1 ) {
+              gap = parseInt( config.datelimit.split('week')[0], 10 );
+              dateLimit.setDate( currentDay - gap*7 );
+            }
+            else if ( config.datelimit.indexOf('month') > -1 ) {
+              gap = parseInt( config.datelimit.split('month')[0], 10 );
+              currentMonth = dateLimit.getMonth();
+              dateLimit.setMonth( currentMonth - gap );
+            }
             break;
         }
-
-        now = dateLimit.getDate();
-        dateLimit.setDate( now - (nbDays-1) );
       }
 
       // The element where the lifestream is linked to
@@ -133,8 +136,9 @@
         for ( ; i < length; i++ ) {
           item = items[i];
           itemDate = item.date.setHours(0,0,0,0);
-          if ( item.html && 
-               (!settings.dateLimit || !isAcceptedLimit || 
+
+          if ( item.html &&
+               (!settings.datelimit || !isAcceptedLimit ||
                (isAcceptedLimit && itemDate >= dateLimit.getTime())) ) {
             $('<li class="'+ settings.classname + '-'
               + item.config.service + '">').data( "time", item.date )
