@@ -135,7 +135,7 @@
         // unordered list
         for ( ; i < length; i++ ) {
           item = items[i];
-          itemDate = item.date.setHours(0,0,0,0);
+          itemDate = new Date(item.date).setHours(0,0,0,0);
 
           if ( item.html &&
                (!settings.datelimit || !isAcceptedLimit ||
