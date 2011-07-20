@@ -19,6 +19,61 @@
         .replace( "__QUERY__" , encodeURIComponent( query ) );
   };
 
+  var isLimitedToToday = function( limit ) {
+    return ( limit &&
+                (limit.indexOf('today') > -1 || limit.indexOf('1day') > -1) );
+  };
+
+  var isAcceptableLimit = function( limit ) {
+    var humanReadableLimits = [ 'today', 'yesterday' ],
+        isGoodLimitFormat = ( limit && limit.match(
+		      /^((1\s*(day|week|month))|([0-9]*\s*(days|weeks|months)))$/i)
+		      !== null );
+
+		return ( limit &&
+		      (isGoodLimitFormat || $.inArray(limit, humanReadableLimits) > -1) );
+  };
+
+  var getDateLimit = function( limit ) {
+    var isLimited = isAcceptableLimit( limit ),
+        dateLimit;
+
+    if ( !isLimited && !isLimitedToToday( limit ) ) {
+      dateLimit = false;
+    } else {
+      dateLimit = new Date();
+      dateLimit.setHours(0,0,0,0);
+    }
+
+    if ( isLimited ) {
+      var gap, currentDay, currentMonth;
+      currentDay = dateLimit.getDate();
+
+      switch ( limit ) {
+        case 'yesterday':
+          dateLimit.setDate( currentDay - 1 );
+          break;
+        default:
+          if ( limit.indexOf('days') > -1 ) {
+            gap = parseInt( limit.split('days')[0], 10 );
+            dateLimit.setDate( currentDay - gap+1 );
+          }
+          else if ( limit.indexOf('week') > -1 ) {
+            gap = parseInt( limit.split('week')[0], 10 );
+            dateLimit.setDate( currentDay - gap*7 );
+          }
+          else if ( limit.indexOf('month') > -1 ) {
+            gap = parseInt( limit.split('month')[0], 10 );
+            currentMonth = dateLimit.getMonth();
+            dateLimit.setMonth( currentMonth - gap );
+          }
+          break;
+      }
+    }
+
+    return dateLimit;
+  };
+
   /**
    * Initialize the lifestream plug-in
    * @param {Object} config Configuration object
@@ -27,48 +82,6 @@
 
     // Make the plug-in chainable
     return this.each(function() {
-
-			var humanReadableLimits = [ 'today', 'yesterday' ],
-
-					isGoodLimitFormat = ( config.datelimit && config.datelimit.match(
-					/^((1\s*(day|week|month))|([1-9]+[0-9]*\s*(days|weeks|months)))$/i)
-					!== null ),
-
-					isAcceptedLimit = ( config.datelimit && (isGoodLimitFormat ||
-					          $.inArray(config.datelimit, humanReadableLimits) > -1) ),
-
-					isLimitedToToday = ( config.datelimit &&
-                              (config.datelimit.indexOf('today') > -1 ||
-                              config.datelimit.indexOf('1day') > -1) ),
-
-					dateLimit = new Date();
-			dateLimit.setHours(0,0,0,0);
-
-      if ( isAcceptedLimit && !isLimitedToToday ) {
-        var gap, currentDay, currentMonth;
-        currentDay = dateLimit.getDate();
-
-        switch ( config.datelimit ) {
-          case humanReadableLimits[0]:
-            dateLimit.setDate( currentDay - 1 );
-            break;
-          default:
-            if ( config.datelimit.indexOf('days') > -1 ) {
-              gap = parseInt( config.datelimit.split('days')[0], 10 );
-              dateLimit.setDate( currentDay - gap );
-            }
-            else if ( config.datelimit.indexOf('week') > -1 ) {
-              gap = parseInt( config.datelimit.split('week')[0], 10 );
-              dateLimit.setDate( currentDay - gap*7 );
-            }
-            else if ( config.datelimit.indexOf('month') > -1 ) {
-              gap = parseInt( config.datelimit.split('month')[0], 10 );
-              currentMonth = dateLimit.getMonth();
-              dateLimit.setMonth( currentMonth - gap );
-            }
-            break;
-        }
-      }
 
       // The element where the lifestream is linked to
       var outputElement = $(this),
@@ -96,6 +109,10 @@
       // We use the item settings to pass the global settings variable to
       // every feed
       itemsettings = jQuery.extend( true, {}, settings ),
+
+      configDateLimit = getDateLimit( config.datelimit ),
+
+      feedsDateLimits = [],
 
       /**
        * This method will be called every time a feed is loaded. This means
@@ -125,27 +142,43 @@
             length = ( items.length < settings.limit ) ?
               items.length :
               settings.limit,
-            i = 0, item, itemDate,
+            i = 0, item, itemDate, feedDateLimit, isAcceptableFeedLimit,
 
             // We create an unordered list which will create all the feed
             // items
             ul = $('<ul class="' + settings.classname + '"/>');
 
+        if ( inputdata.length > 0 ) {
+          feedDateLimit = inputdata[0].config.datelimit;
+
+          isAcceptableFeedLimit = ( feedDateLimit !== undefined ) ?
+              ( isAcceptableLimit( feedDateLimit ) ||
+              isLimitedToToday( feedDateLimit ) ) : false;
+
+          if ( isAcceptableFeedLimit ) {
+            dateLimit = getDateLimit( feedDateLimit );
+          } else {
+            dateLimit = configDateLimit;
+          }
+
+          feedsDateLimits[inputdata[0].config.service] = dateLimit;
+        }
+
         // Run over all the feed items + add them as list items to the
         // unordered list
         for ( ; i < length; i++ ) {
           item = items[i];
-          itemDate = new Date(item.date).setHours(0,0,0,0);
+          itemDate = new Date(item.date);
+          itemDate.setHours(0,0,0,0);
 
-          if ( item.html &&
-               (!settings.datelimit || !isAcceptedLimit ||
-               (isAcceptedLimit && itemDate >= dateLimit.getTime())) ) {
+          if ( item.html && (!dateLimit || (dateLimit &&
+           itemDate >= feedsDateLimits[item.config.service].getTime())) ) {
             $('<li class="'+ settings.classname + '-'
               + item.config.service + '">').data( "time", item.date )
                                            .append( item.html )
                                            .appendTo( ul );
+          }
         }
-      }
 
         // Change the innerHTML with a list of all the feeditems in
         // chronological order
