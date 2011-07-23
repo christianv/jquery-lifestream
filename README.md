@@ -14,6 +14,7 @@ Check out [the example][example] or create [your own lifestream][melifestream] i
 
 Currently supports the following feeds:
 
+* [Bitly](http://bitly.com)
 * [Blogger](http://blogger.com)
 * [Dailymotion](http://dailymotion.com)
 * [Delicious](http://delicious.com)
@@ -46,13 +47,43 @@ Currently supports the following feeds:
 Feel free to fork the project and add your own feeds in.  
 Just send a pull request to [christianv/jquery-lifestream][jquery-lifestream] when you're finished.
 
+## Build
+
+    cd build
+    make
+
+### Available targets
+
+Use `make target` and replace _target_ with the target you want to use.
+
+* **jls**:
+  Build jquery.lifestream.js, the non-minified version of jQuery Lifestream
+* **jls-min**: 
+  Build jquery.lifestream.min.js, the minified version of jQuery Lifestream
+* **script-min**:
+  Build download/js/script.min.js, this script is the main script for the
+  download page
+* **uglifyjs**: 
+  Build download/js/uglify-cs.js, a custom version of UglifyJS patched
+  to work in the browser
+* **uglifyjs-min**:
+  Build download/js/uglify-cs.min.js, minified version of UglifyJS
+* **service-list**:
+  Build download/services.json, a list of all the services which are available
+
+### Requirements
+
+* [Node](https://github.com/joyent/node/wiki/Installation)
+* [Npm](http://npmjs.org/)
+* [UglifyJS](https://github.com/mishoo/UglifyJS/)
+
 ## Usage
 
 Add the following to the &lt;head&gt; or &lt;body&gt; tag of your HTML page.
 
 ``` html
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
-<script src="https://raw.github.com/christianv/jquery-lifestream/master/jquery.lifestream-compiled.js"></script>
+<script src="https://raw.github.com/christianv/jquery-lifestream/master/jquery.lifestream.min.js"></script>
 <script>
   $("#lifestream").lifestream({
     list:[
@@ -69,7 +100,7 @@ Add the following to the &lt;head&gt; or &lt;body&gt; tag of your HTML page.
 </script>
 ```
 The above code will always use the latest version of the script.  
-If you want to use it in production, download the [compressed](https://github.com/christianv/jquery-lifestream/raw/master/jquery.lifestream-compiled.js)
+If you want to use it in production, download the [minified](https://github.com/christianv/jquery-lifestream/raw/master/jquery.lifestream.min.js)
 or [uncompressed](https://github.com/christianv/jquery-lifestream/raw/master/jquery.lifestream.js) file and host it yourself.
 
 ### jQuery Templates
@@ -181,6 +212,8 @@ Special thanks all the [committers](https://raw.github.com/christianv/jquery-lif
 
 ## Version log
 
+* 0.2.0 Modular builds
+* 0.1.6 Bitly support
 * 0.1.5 Snipplr support
 * 0.1.4 Instapaper support
 * 0.1.3 Mlkshk support

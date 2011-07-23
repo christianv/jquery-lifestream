@@ -1,0 +1,104 @@
+* {margin: 0; padding: 0; }
+body {
+  background: url(../img/bg-content.png) repeat top left #000000;
+  color: #aaaaaa;
+  font: 62.5%/1 "Myriad Pro", Frutiger, "Lucida Grande", "Lucida Sans", "Lucida Sans Unicode", Verdana, sans-serif;
+}
+.clear {
+  clear: both;
+}
+form {
+  width: 470px;
+  margin: 40px auto;
+  /* font-size: 1.4em; */
+}
+fieldset {
+	padding: 1em;
+	border : 1px solid #ccc;
+	background-color: #000000
+}
+legend {
+	font-weight: bold;
+  color: #ffffff;
+}
+form div {
+  position: relative;
+	width: 100%;
+	padding: 0.4em 0;
+	clear: both;
+}
+.col {
+  width: 11em;
+	float: left;
+	clear: none;
+}
+input[type="checkbox"] {
+  margin-right: 10px;
+}
+#button-bar {
+  /* text-align: center; */
+  /* padding-top: 15px;
+  padding-bottom: 20px; 
+  margin: 0; */
+  margin-top: 10px;
+}
+#button {
+  /* margin: 0 0 0 120px;
+  display: none; */
+  padding: 5px 5px 8px;
+  margin-right: 10px;
+}
+#button-bar > object {
+  vertical-align: middle;
+}
+/* jQuery Notifications plugin - http://programmingmind.com */
+/* notification container */
+#jquery-notifications {
+  position: fixed; /*was relative*/
+  width: 25%;
+  right: 0;
+  /*width: 100%;
+  left: 0;*/
+  top: 0;
+  z-index: 100000;
+}
+#jquery-notifications p {
+  text-align: center;
+  position: relative;
+  margin: 0;
+  padding: 5px;
+  padding-left: 10px;
+  border-bottom: 2px solid;
+  /* style property for the close text */
+}
+#jquery-notifications p a {
+  position: absolute;
+  right: 10px;
+  margin-right: 10px;
+  color: black;
+  text-decoration: none;
+  border: 1px solid black;
+  padding-right: 5px;
+  padding-left: 5px;
+}
+#jquery-notifications .notice {
+  background: #6c9ffc;
+  color: #ffffff; /*#061a72;*/
+  border-color: #061a72;
+  opacity: 0.9;
+}
+#jquery-notifications .success {
+  background: #96f96f;
+  color: #045419;
+  border-color: #045419;
+}
+#jquery-notifications .warning {
+  background: #f7ae57;
+  color: #753903;
+  border-color: #753903;
+}
+#jquery-notifications .error {
+  background: #f97c6f;
+  color: #570f01;
+  border-color: #570f01;
+}
