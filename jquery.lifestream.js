@@ -9,6 +9,72 @@
 ;(function( $ ){
 
   /**
+   * Create a valid YQL URL by passing in a query
+   * @param {String} query The query you want to convert into a valid yql url
+   * @return {String} A valid YQL URL
+   */
+  var createYqlUrl = function( query ) {
+      return ( "http://query.yahooapis.com/v1/public/yql?q=__QUERY__&env=" +
+      "store://datatables.org/alltableswithkeys&format=json")
+        .replace( "__QUERY__" , encodeURIComponent( query ) );
+  };
+
+  var isLimitedToToday = function( limit ) {
+    return ( limit &&
+                (limit.indexOf('today') > -1 || limit.indexOf('1day') > -1) );
+  };
+
+  var isAcceptableLimit = function( limit ) {
+    var humanReadableLimits = [ 'today', 'yesterday' ],
+        isGoodLimitFormat = ( limit && limit.match(
+		      /^((1\s*(day|week|month))|([0-9]*\s*(days|weeks|months)))$/i)
+		      !== null );
+
+		return ( limit &&
+		      (isGoodLimitFormat || $.inArray(limit, humanReadableLimits) > -1) );
+  };
+
+  var getDateLimit = function( limit ) {
+    var isLimited = isAcceptableLimit( limit ),
+        dateLimit;
+
+    if ( !isLimited && !isLimitedToToday( limit ) ) {
+      dateLimit = false;
+    } else {
+      dateLimit = new Date();
+      dateLimit.setHours(0,0,0,0);
+    }
+
+    if ( isLimited ) {
+      var gap, currentDay, currentMonth;
+      currentDay = dateLimit.getDate();
+
+      switch ( limit ) {
+        case 'yesterday':
+          dateLimit.setDate( currentDay - 1 );
+          break;
+        default:
+          if ( limit.indexOf('days') > -1 ) {
+            gap = parseInt( limit.split('days')[0], 10 );
+            dateLimit.setDate( currentDay - gap+1 );
+          }
+          else if ( limit.indexOf('week') > -1 ) {
+            gap = parseInt( limit.split('week')[0], 10 );
+            dateLimit.setDate( currentDay - gap*7 );
+          }
+          else if ( limit.indexOf('month') > -1 ) {
+            gap = parseInt( limit.split('month')[0], 10 );
+            currentMonth = dateLimit.getMonth();
+            dateLimit.setMonth( currentMonth - gap );
+          }
+          break;
+      }
+    }
+
+    return dateLimit;
+  };
+
+  /**
    * Initialize the lifestream plug-in
    * @param {Object} config Configuration object
    */
@@ -44,6 +110,10 @@
       // every feed
       itemsettings = jQuery.extend( true, {}, settings ),
 
+      configDateLimit = getDateLimit( config.datelimit ),
+
+      feedsDateLimits = [],
+
       /**
        * This method will be called every time a feed is loaded. This means
        * that several DOM changes will occur. We did this because otherwise it
@@ -72,17 +142,37 @@
             length = ( items.length < settings.limit ) ?
               items.length :
               settings.limit,
-            i = 0, item,
+            i = 0, item, itemDate, feedDateLimit, isAcceptableFeedLimit,
 
             // We create an unordered list which will create all the feed
             // items
             ul = $('<ul class="' + settings.classname + '"/>');
 
+        if ( inputdata.length > 0 ) {
+          feedDateLimit = inputdata[0].config.datelimit;
+
+          isAcceptableFeedLimit = ( feedDateLimit !== undefined ) ?
+              ( isAcceptableLimit( feedDateLimit ) ||
+              isLimitedToToday( feedDateLimit ) ) : false;
+
+          if ( isAcceptableFeedLimit ) {
+            dateLimit = getDateLimit( feedDateLimit );
+          } else {
+            dateLimit = configDateLimit;
+          }
+
+          feedsDateLimits[inputdata[0].config.service] = dateLimit;
+        }
+
         // Run over all the feed items + add them as list items to the
         // unordered list
         for ( ; i < length; i++ ) {
           item = items[i];
-          if ( item.html ) {
+          itemDate = new Date(item.date);
+          itemDate.setHours(0,0,0,0);
+
+          if ( item.html && (!dateLimit || (dateLimit &&
+           itemDate >= feedsDateLimits[item.config.service].getTime())) ) {
             $('<li class="'+ settings.classname + '-'
               + item.config.service + '">').data( "time", item.date )
                                            .append( item.html )

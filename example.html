@@ -113,11 +113,13 @@
         },
         {
           service: 'foomark',
-          user: 'thatryan'
+          user: 'thatryan',
+          datelimit: '3days'
         },
         {
           service: 'formspring',
-          user: 'formspring'
+          user: 'formspring',
+          datelimit: '1week'
         },
         {
           service: 'forrst',
@@ -140,7 +142,8 @@
         },
         {
           service: 'iusethis',
-          user: 'marcus'
+          user: 'marcus',
+          datelimit: 'today'
         },
         {
           service: 'lastfm',
@@ -222,6 +225,7 @@
       };
 
       $("#lifestream").lifestream({
+        datelimit: '1month',
         limit: 400,
         list: list,
         feedloaded: function(){
