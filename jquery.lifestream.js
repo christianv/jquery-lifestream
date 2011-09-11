@@ -86,6 +86,10 @@
             $('<li class="'+ settings.classname + '-'
               + item.config.service + '">').data( "time", item.date )
                                            .append( item.html )
+                                           .append( ' <span class="via">'
+                                             + 'via <a href="' + item.url
+                                             + '">' + item.config.service
+                                             + '</a></span>' )
                                            .appendTo( ul );
           }
         }
@@ -167,7 +171,8 @@
    */
   $.fn.lifestream.feeds = $.fn.lifestream.feeds || {};
 
-}( jQuery ));(function($) {
+}( jQuery ));
+(function($) {
 $.fn.lifestream.feeds.bitbucket = function( config, callback ) {
 
   var template = $.extend({},
@@ -871,7 +876,8 @@ $.fn.lifestream.feeds.googlereader = function( config, callback ) {
 
   var template = $.extend({},
     {
-      starred: 'shared post <a href="${link.href}">${title.content}</a>'
+      starred: '<a href="{{if link.href}}${link.href}'
+        + '{{else}}${source.link.href}{{/if}}">${title.content}</a>'
     },
     config.template),
 
@@ -913,7 +919,8 @@ $.fn.lifestream.feeds.googlereader = function( config, callback ) {
   };
 
 };
-})(jQuery);(function($) {
+})(jQuery);
+(function($) {
 $.fn.lifestream.feeds.instapaper = function( config, callback ) {
 
   var template = $.extend({},
