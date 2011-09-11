@@ -22,7 +22,8 @@ $.fn.lifestream.feeds.googlereader = function( config, callback ) {
         output.push({
           date: new Date(parseInt(item["crawl-timestamp-msec"], 10)),
           config: config,
-          html: $.tmpl( template.starred, item )
+          html: $.tmpl( template.starred, item ),
+          url: 'http://google.com/reader/shared/' + config.user
         });
       }
     }

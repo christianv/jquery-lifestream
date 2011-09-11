@@ -86,6 +86,10 @@
             $('<li class="'+ settings.classname + '-'
               + item.config.service + '">').data( "time", item.date )
                                            .append( item.html )
+                                           .append( ' <span class="via">'
+                                             + 'via <a href="' + item.url 
+                                             + '">' + item.config.service 
+                                             + '</a></span>' )
                                            .appendTo( ul );
           }
         }
