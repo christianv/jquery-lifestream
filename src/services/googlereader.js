@@ -3,7 +3,7 @@ $.fn.lifestream.feeds.googlereader = function( config, callback ) {
 
   var template = $.extend({},
     {
-      starred: '<a href="{{if link.href}}${link.href}'
+      starred: 'shared <a href="{{if link.href}}${link.href}'
         + '{{else}}${source.link.href}{{/if}}">${title.content}</a>'
     },
     config.template),
