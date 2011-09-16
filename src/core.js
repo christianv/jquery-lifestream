@@ -87,9 +87,9 @@
               + item.config.service + '">').data( "time", item.date )
                                            .append( item.html )
                                            .append( '<span class="via">'
-                                             + ' on <a href="' + item.url 
+                                             + '<a href="' + item.url 
                                              + '">' + item.config.service 
-                                             + '</a></span> only ' )
+                                             + '</a></span>' )
                                            .appendTo( ul );
           }
         }

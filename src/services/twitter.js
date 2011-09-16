@@ -3,7 +3,7 @@ $.fn.lifestream.feeds.twitter = function( config, callback ) {
 
   var template = $.extend({},
     {
-      posted: 'tweeted "{{html tweet}}"'
+      posted: '{{html tweet}}'
     },
     config.template),
 
