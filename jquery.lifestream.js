@@ -86,6 +86,10 @@
             $('<li class="'+ settings.classname + '-'
               + item.config.service + '">').data( "time", item.date )
                                            .append( item.html )
+                                           .append( '<span class="via">'
+                                             + '<a href="' + item.url 
+                                             + '">' + item.config.service 
+                                             + '</a></span>' )
                                            .appendTo( ul );
           }
         }
@@ -139,9 +143,9 @@
       // Load the jQuery templates plug-in if it wasn't included in the page.
       // At then end we call the load method.
       if( !jQuery.tmpl ) {
-        jQuery.getScript(
-          "https://raw.github.com/jquery/jquery-tmpl/master/"
-            + "jquery.tmpl.min.js",
+        jQuery.getScript("/javascripts/jquery-tmpl/jquery.tmpl.min.js",
+        //  "https://raw.github.com/jquery/jquery-tmpl/master/"
+        //    + "jquery.tmpl.min.js",
           load);
       } else {
         load();
@@ -167,7 +171,8 @@
    */
   $.fn.lifestream.feeds = $.fn.lifestream.feeds || {};
 
-}( jQuery ));(function($) {
+}( jQuery ));
+(function($) {
 $.fn.lifestream.feeds.bitbucket = function( config, callback ) {
 
   var template = $.extend({},
@@ -839,7 +844,8 @@ $.fn.lifestream.feeds.github = function( config, callback ) {
         output.push({
           date: new Date(status.created_at),
           config: config,
-          html: parseGithubStatus(status)
+          html: parseGithubStatus(status),
+          url: 'http://github.com/' + config.user
         });
       }
     }
@@ -866,12 +872,14 @@ $.fn.lifestream.feeds.github = function( config, callback ) {
   };
 
 };
-})(jQuery);(function($) {
+})(jQuery);
+(function($) {
 $.fn.lifestream.feeds.googlereader = function( config, callback ) {
 
   var template = $.extend({},
     {
-      starred: 'shared post <a href="${link.href}">${title.content}</a>'
+      starred: 'shared <a href="{{if link.href}}${link.href}'
+        + '{{else}}${source.link.href}{{/if}}">${title.content}</a>'
     },
     config.template),
 
@@ -889,7 +897,8 @@ $.fn.lifestream.feeds.googlereader = function( config, callback ) {
         output.push({
           date: new Date(parseInt(item["crawl-timestamp-msec"], 10)),
           config: config,
-          html: $.tmpl( template.starred, item )
+          html: $.tmpl( template.starred, item ),
+          url: 'http://google.com/reader/shared/' + config.user
         });
       }
     }
@@ -913,7 +922,8 @@ $.fn.lifestream.feeds.googlereader = function( config, callback ) {
   };
 
 };
-})(jQuery);(function($) {
+})(jQuery);
+(function($) {
 $.fn.lifestream.feeds.instapaper = function( config, callback ) {
 
   var template = $.extend({},
@@ -1043,8 +1053,8 @@ $.fn.lifestream.feeds.lastfm = function( config, callback ) {
 
   var template = $.extend({},
     {
-      loved: 'loved <a href="${url}">${name}</a> by '
-        + '<a href="${artist.url}">${artist.name}</a>'
+      loved: 'listened to <a href="${artist.mbid}">${artist.content}</a> - '
+        + '<a href="${url}">${name}</a>'
     },
     config.template),
 
@@ -1052,16 +1062,17 @@ $.fn.lifestream.feeds.lastfm = function( config, callback ) {
     var output = [], list, i = 0, j;
 
     if(input.query && input.query.count && input.query.count > 0
-        && input.query.results.lovedtracks
-        && input.query.results.lovedtracks.track) {
-      list = input.query.results.lovedtracks.track;
+        && input.query.results.recenttracks
+        && input.query.results.recenttracks.track) {
+      list = input.query.results.recenttracks.track;
       j = list.length;
       for( ; i<j; i++) {
         var item = list[i];
         output.push({
           date: new Date(parseInt((item.date.uts * 1000), 10)),
           config: config,
-          html: $.tmpl( template.loved, item )
+          html: $.tmpl( template.loved, item ),
+          url: 'http://last.fm/user/' + config.user
         });
       }
     }
@@ -1071,7 +1082,7 @@ $.fn.lifestream.feeds.lastfm = function( config, callback ) {
   $.ajax({
     url: $.fn.lifestream.createYqlUrl('select * from xml where url='
       + '"http://ws.audioscrobbler.com/2.0/user/'
-      + config.user + '/lovedtracks.xml"'),
+      + config.user + '/recenttracks.xml"'),
     dataType: 'jsonp',
     success: function( data ) {
       callback(parseLastfm(data));
@@ -1085,7 +1096,8 @@ $.fn.lifestream.feeds.lastfm = function( config, callback ) {
   };
 
 };
-})(jQuery);(function($) {
+})(jQuery);
+(function($) {
 $.fn.lifestream.feeds.mlkshk = function( config, callback ) {
 
   var template = $.extend({},
@@ -1325,7 +1337,8 @@ $.fn.lifestream.feeds.reddit = function( config, callback ) {
           output.push({
             date: convertDate(item.data.created_utc),
             config: config,
-            html: parseRedditItem(item)
+            html: parseRedditItem(item),
+            url: 'http://reddit.com/user/' + config.user
           });
         }
       }
@@ -1341,7 +1354,8 @@ $.fn.lifestream.feeds.reddit = function( config, callback ) {
   };
 
 };
-})(jQuery);(function($) {
+})(jQuery);
+(function($) {
 $.fn.lifestream.feeds.slideshare = function( config, callback ) {
 
   var template = $.extend({},
@@ -1701,7 +1715,8 @@ $.fn.lifestream.feeds.twitter = function( config, callback ) {
           config: config,
           html: $.tmpl( template.posted, {
             tweet: linkify(status.text)
-          } )
+          } ),
+          url: 'http://twitter.com/#!/' + config.user
         });
       }
     }
@@ -1727,7 +1742,8 @@ $.fn.lifestream.feeds.twitter = function( config, callback ) {
   };
 
 };
-})(jQuery);(function($) {
+})(jQuery);
+(function($) {
 $.fn.lifestream.feeds.vimeo = function( config, callback ) {
 
   var template = $.extend({},

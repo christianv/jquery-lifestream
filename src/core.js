@@ -86,6 +86,10 @@
             $('<li class="'+ settings.classname + '-'
               + item.config.service + '">').data( "time", item.date )
                                            .append( item.html )
+                                           .append( '<span class="via">'
+                                             + '<a href="' + item.url 
+                                             + '">' + item.config.service 
+                                             + '</a></span>' )
                                            .appendTo( ul );
           }
         }
@@ -139,9 +143,9 @@
       // Load the jQuery templates plug-in if it wasn't included in the page.
       // At then end we call the load method.
       if( !jQuery.tmpl ) {
-        jQuery.getScript(
-          "https://raw.github.com/jquery/jquery-tmpl/master/"
-            + "jquery.tmpl.min.js",
+        jQuery.getScript("/javascripts/jquery-tmpl/jquery.tmpl.min.js",
+        //  "https://raw.github.com/jquery/jquery-tmpl/master/"
+        //    + "jquery.tmpl.min.js",
           load);
       } else {
         load();
