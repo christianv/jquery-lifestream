@@ -11,6 +11,10 @@ $.fn.lifestream.feeds.reddit = function( config, callback ) {
       created: '<a href="http://www.reddit.com${item.data.permalink}">'
         + 'created new thread (${score})</a> in '
         + '<a href="http://www.reddit.com/r/${item.data.subreddit}">'
+        + '${item.data.subreddit}</a>',
+      liked: 'liked <a href="http://www.reddit.com${item.data.permalink}">'
+        + '${item.data.title} (${score})</a> in '
+        + '<a href="http://www.reddit.com/r/${item.data.subreddit}">'
         + '${item.data.subreddit}</a>'
     },
     config.template);
@@ -32,7 +36,7 @@ $.fn.lifestream.feeds.reddit = function( config, callback ) {
       return $.tmpl( template.commented, pass );
     }
     else if (item.kind === "t3") {
-      return $.tmpl( template.created, pass );
+      return $.tmpl( template.liked, pass );
     }
 
   },
@@ -45,7 +49,7 @@ $.fn.lifestream.feeds.reddit = function( config, callback ) {
   };
 
   $.ajax({
-    url: "http://www.reddit.com/user/" + config.user + ".json",
+    url: "http://www.reddit.com/user/" + config.user + "/liked.json",
     dataType: "jsonp",
     jsonp:"jsonp",
     success: function( data ) {

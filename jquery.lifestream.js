@@ -1000,7 +1000,7 @@ $.fn.lifestream.feeds.googlereader = function( config, callback ) {
       for( ; i<j; i++) {
         var item = list[i];
         output.push({
-          url: 'http://www.google.com/reader/shared' + config.user,
+          url: 'http://www.google.com/reader/shared/' + config.user,
           date: new Date(parseInt(item["crawl-timestamp-msec"], 10)),
           config: config,
           html: $.tmpl( template.starred, item )
@@ -1033,7 +1033,7 @@ $.fn.lifestream.feeds.instapaper = function( config, callback ) {
 
   var template = $.extend({},
     {
-      loved: 'loved <a href="${link}">${title}</a>'
+      loved: 'starred <a href="${link}">${title}</a>'
     },
     config.template),
 
@@ -1050,7 +1050,8 @@ $.fn.lifestream.feeds.instapaper = function( config, callback ) {
         output.push({
           date: new Date( item.pubDate ),
           config: config,
-          html: $.tmpl( template.loved, item )
+          html: $.tmpl( template.loved, item ),
+          url: 'http://www.instapaper.com/'
         });
       }
     }
@@ -1074,7 +1075,8 @@ $.fn.lifestream.feeds.instapaper = function( config, callback ) {
   };
 
 };
-})(jQuery);(function($) {
+})(jQuery);
+(function($) {
 $.fn.lifestream.feeds.iusethis = function( config, callback ) {
 
   var template = $.extend({},
@@ -1440,6 +1442,10 @@ $.fn.lifestream.feeds.reddit = function( config, callback ) {
       created: '<a href="http://www.reddit.com${item.data.permalink}">'
         + 'created new thread (${score})</a> in '
         + '<a href="http://www.reddit.com/r/${item.data.subreddit}">'
+        + '${item.data.subreddit}</a>',
+      liked: 'liked <a href="http://www.reddit.com${item.data.permalink}">'
+        + '${item.data.title} (${score})</a> in '
+        + '<a href="http://www.reddit.com/r/${item.data.subreddit}">'
         + '${item.data.subreddit}</a>'
     },
     config.template);
@@ -1461,7 +1467,7 @@ $.fn.lifestream.feeds.reddit = function( config, callback ) {
       return $.tmpl( template.commented, pass );
     }
     else if (item.kind === "t3") {
-      return $.tmpl( template.created, pass );
+      return $.tmpl( template.liked, pass );
     }
 
   },
@@ -1474,7 +1480,7 @@ $.fn.lifestream.feeds.reddit = function( config, callback ) {
   };
 
   $.ajax({
-    url: "http://www.reddit.com/user/" + config.user + ".json",
+    url: "http://www.reddit.com/user/" + config.user + "/liked.json",
     dataType: "jsonp",
     jsonp:"jsonp",
     success: function( data ) {
@@ -1801,7 +1807,8 @@ $.fn.lifestream.feeds.tumblr = function( config, callback ) {
   };
 
 };
-})(jQuery);(function($) {
+})(jQuery);
+(function($) {
 $.fn.lifestream.feeds.twitter = function( config, callback ) {
 
   var template = $.extend({},
@@ -2076,6 +2083,51 @@ $.fn.lifestream.feeds.youtube = function( config, callback ) {
     dataType: 'jsonp',
     success: function( data ) {
       callback(parseYoutube(data));
+    }
+  });
+
+  // Expose the template.
+  // We use this to check which templates are available
+  return {
+    "template" : template
+  };
+
+};
+})(jQuery);(function($) {
+$.fn.lifestream.feeds.zotero = function( config, callback ) {
+
+  var template = $.extend({},
+    {
+      flagged: 'flagged <a href="${id}">${title}</a> by ${creatorSummary}'
+    },
+    config.template),
+
+  parseZotero = function( input ) {
+    var output = [], list, i = 0, j;
+
+    if(input.query && input.query.count && input.query.count > 0) {
+      list = input.query.results.feed.entry;
+      j = list.length;
+      for( ; i<j; i++) {
+        var item = list[i];
+        output.push({
+          date: new Date(item.updated),
+          config: config,
+          url: 'http://zotero.com/users/' + config.user,
+          html: $.tmpl( template.flagged, item ),
+        });
+      }
+    }
+    return output;
+  };
+
+  $.ajax({
+    url: $.fn.lifestream.createYqlUrl('select * from xml where url='
+      + '"https://api.zotero.org/users/'
+      + config.user + '/items"'),
+    dataType: 'jsonp',
+    success: function( data ) {
+      callback(parseZotero(data));
     }
   });
 
