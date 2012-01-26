@@ -30,7 +30,11 @@ Currently supports the following feeds:
 * [Foursquare](http://foursquare.com)
 * [Gimmebar](http://gimmebar.com)
 * [Github](http://github.com)
+<<<<<<< HEAD
+* [Google+](http://plus.google.com/)
+=======
 * [Google+](http://plus.google.com)
+>>>>>>> upstream/master
 * [Google Reader](http://google.com/reader)
 * [Instapaper](http://www.instapaper.com)
 * [Iusethis](http://osx.iusethis.com/)
