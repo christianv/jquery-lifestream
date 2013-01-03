@@ -5,7 +5,7 @@
  *
  * Copyright 2011, Christian Vuerings - http://denbuzze.com
  */
-/*globals jQuery, $ */
+/*global jQuery */
 ;(function( $ ){
 
   "use strict";
@@ -144,7 +144,7 @@
       // At then end we call the load method.
       if( !jQuery.tmpl ) {
         jQuery.getScript(
-          "http://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js",
+          "https://raw.github.com/jquery/jquery-tmpl/master/jquery.tmpl.min.js",
           load);
       } else {
         load();
