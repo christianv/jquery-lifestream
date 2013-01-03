@@ -144,7 +144,7 @@
       // At then end we call the load method.
       if( !jQuery.tmpl ) {
         jQuery.getScript(
-          "https://raw.github.com/jquery/jquery-tmpl/master/jquery.tmpl.min.js",
+          "http://ajax.aspnetcdn.com/ajax/jquery.templates/beta1/jquery.tmpl.js",
           load);
       } else {
         load();
