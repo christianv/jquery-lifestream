@@ -26,8 +26,9 @@ $.fn.lifestream.feeds.vimeo = function( config, callback ) {
           config: config,
           html: $.tmpl( template[type], {
             url: item.url,
-            description: item.description.replace(/"/g, "'")
-              .replace( /<.+?>/gi, ""),
+            description: item.description ? item.description
+              .replace(/"/g, "'")
+              .replace( /<.+?>/gi, "") : '',
             title: item.title
           })
         });
