@@ -144,7 +144,7 @@
       // At then end we call the load method.
       if( !jQuery.tmpl ) {
         jQuery.getScript(
-          "https://raw.github.com/jquery/jquery-tmpl/master/jquery.tmpl.min.js",
+          "http://ajax.aspnetcdn.com/ajax/jquery.templates/beta1/jquery.tmpl.js",
           load);
       } else {
         load();
@@ -2332,6 +2332,12 @@ $.fn.lifestream.feeds.youtube = function( config, callback ) {
       j = input.data.items.length;
       for( ; i<j; i++) {
         item = input.data.items[i];
+
+        // Don't add private items
+        if (item.video.status && item.video.status.reason) {
+          continue;
+        }
+
         output.push({
           date: new Date(item.created),
           config: config,
