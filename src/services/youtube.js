@@ -15,6 +15,12 @@ $.fn.lifestream.feeds.youtube = function( config, callback ) {
       j = input.data.items.length;
       for( ; i<j; i++) {
         item = input.data.items[i];
+
+        // Don't add private items
+        if (item.video.status && item.video.status.reason) {
+          continue;
+        }
+
         output.push({
           date: new Date(item.created),
           config: config,
