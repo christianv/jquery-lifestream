@@ -2321,28 +2321,43 @@ $.fn.lifestream.feeds.youtube = function( config, callback ) {
 
   var template = $.extend({},
     {
+      uploaded: 'uploaded <a href="${video.player.default}" '
+        + 'title="${video.description}">${video.title}</a>',
       favorited: 'favorited <a href="${video.player.default}" '
         + 'title="${video.description}">${video.title}</a>'
     },
     config.template),
 
-  parseYoutube = function( input ) {
-    var output = [], i = 0, j, item;
+  parseYoutube = function( input, activity ) {
+    var output = [], i = 0, j, item, video, date, templateData;
 
     if(input.data && input.data.items) {
       j = input.data.items.length;
       for( ; i<j; i++) {
         item = input.data.items[i];
 
+        switch (activity) {
+          case 'favorited':
+            video = item.video;
+            date = item.created;
+            templateData = item;
+            break;
+          case 'uploaded':
+            video = item;
+            date = video.uploaded;
+            templateData = {video: video};
+            break;
+        }
+
         // Don't add private items
-        if (item.video.status && item.video.status.reason) {
+        if (video.status && video.status.reason) {
           continue;
         }
 
         output.push({
-          date: new Date(item.created),
+          date: new Date(date),
           config: config,
-          html: $.tmpl( template.favorited, item )
+          html: $.tmpl( template[activity], templateData )
         });
       }
     }
@@ -2355,7 +2370,16 @@ $.fn.lifestream.feeds.youtube = function( config, callback ) {
       + "/favorites?v=2&alt=jsonc",
     dataType: 'jsonp',
     success: function( data ) {
-      callback(parseYoutube(data));
+      callback(parseYoutube(data, 'favorited'));
+    }
+  });
+
+  $.ajax({
+    url: "http://gdata.youtube.com/feeds/api/users/" + config.user
+      + "/uploads?v=2&alt=jsonc",
+    dataType: 'jsonp',
+    success: function( data ) {
+      callback(parseYoutube(data, 'uploaded'));
     }
   });
 
@@ -2366,7 +2390,8 @@ $.fn.lifestream.feeds.youtube = function( config, callback ) {
   };
 
 };
-})(jQuery);(function($) {
+})(jQuery);
+(function($) {
 $.fn.lifestream.feeds.zotero = function( config, callback ) {
 
   var template = $.extend({},
