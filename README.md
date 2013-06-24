@@ -78,6 +78,8 @@ Use `make target` and replace _target_ with the target you want to use.
   Build jquery.lifestream.js, the non-minified version of jQuery Lifestream
 * **jls-min**: 
   Build jquery.lifestream.min.js, the minified version of jQuery Lifestream
+* **jls-css**:
+  Build css/lifestream.css, the stylesheet containing the favicons
 * **script-min**:
   Build download/js/script.min.js, this script is the main script for the
   download page
@@ -183,12 +185,10 @@ For more information about each _service_, check out the [source code][exampleso
 Adding in your own feed is pretty easy.  
 Have a look at [this commit](https://github.com/christianv/jquery-lifestream/commit/529a06db159b4123ee3b2cc604f3a3ed698c6e9a) which adds support for the last.fm feed.
 
-### Create data:URI for an icon
+### Add your favicon
 
 1. [Convert](http://converticon.com/) the favicon.ico of a site to a .png file. (e.g. http://google.com/favicon.ico)
 2. [Optimize](http://www.smushit.com/ysmush.it/) the .png file. Save it in src/favicons/.
-3. [Make](http://www.dopiaza.org/tools/datauri/) a data:URI for it.
-4. Put the data:URI in css/lifestream.css (alphabetical order).
 
 ### How to commit?
 
