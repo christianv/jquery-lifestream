@@ -65,14 +65,14 @@ $.fn.lifestream.feeds.tumblr = function( config, callback ) {
     case 'conversation':
       title = post['conversation-title'];
       if (!title) {
-        title = post['conversation'].line;
+        title = post.conversation.line;
         if (typeof(title) !== 'string') {
-          title = line[0].label + ' ' + line[0].content + ' ....';
+          title = title[0].label + ' ' + title[0].content + ' ...';
         }
       }
       return title;
     case 'answer':
-      return post['question'];
+      return post.question;
     default:
       return post.type;
     }
@@ -112,15 +112,18 @@ $.fn.lifestream.feeds.tumblr = function( config, callback ) {
         }
       }
       else if ( $.isPlainObject(input.query.results.posts.post) ) {
-        output.push(createTumblrOutput(config,input.query.results.posts.post));
+        output.push(
+          createTumblrOutput(config,input.query.results.posts.post)
+        );
       }
     }
     return output;
   };
 
   $.ajax({
-    url: $.fn.lifestream.createYqlUrl('select *'
-      + ' from tumblr.posts where username="'+ config.user +'" and num="' + limit + '"'),
+    url: $.fn.lifestream.createYqlUrl('select *' +
+      ' from tumblr.posts where username="' + config.user + '"' +
+      ' and num="' + limit + '"'),
     dataType: 'jsonp',
     success: function( data ) {
       callback(parseTumblr(data));

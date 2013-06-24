@@ -42,7 +42,7 @@ $.fn.lifestream.feeds.bitbucket = function( config, callback ) {
   },
 
   parseBitbucket = function( input ) {
-    var output = [], i = 0;
+    var output = [];
     if (input.query && input.query.count && input.query.count > 0) {
       $.each(input.query.results.json, function () {
         output.push({
@@ -57,11 +57,11 @@ $.fn.lifestream.feeds.bitbucket = function( config, callback ) {
   };
 
   $.ajax({
-    url: $.fn.lifestream.createYqlUrl('select events.event,'
-       + 'events.node, events.created_on,'
-       + 'events.repository.name, events.repository.owner '
-       + 'from json where url = "https://api.bitbucket.org/1.0/users/'
-       + config.user + '/events/"'),
+    url: $.fn.lifestream.createYqlUrl('select events.event,' +
+      'events.node, events.created_on,' +
+      'events.repository.name, events.repository.owner ' +
+      'from json where url = "https://api.bitbucket.org/1.0/users/' +
+      config.user + '/events/"'),
     dataType: 'jsonp',
     success: function( data ) {
       callback(parseBitbucket(data));

@@ -19,7 +19,7 @@ $.fn.lifestream.feeds.zotero = function( config, callback ) {
           date: new Date(item.updated),
           config: config,
           url: 'http://zotero.com/users/' + config.user,
-          html: $.tmpl( template.flagged, item ),
+          html: $.tmpl( template.flagged, item )
         });
       }
     }
@@ -27,9 +27,9 @@ $.fn.lifestream.feeds.zotero = function( config, callback ) {
   };
 
   $.ajax({
-    url: $.fn.lifestream.createYqlUrl('select * from xml where url='
-      + '"https://api.zotero.org/users/'
-      + config.user + '/items"'),
+    url: $.fn.lifestream.createYqlUrl('select * from xml where url=' +
+      '"https://api.zotero.org/users/' +
+      config.user + '/items"'),
     dataType: 'jsonp',
     success: function( data ) {
       callback(parseZotero(data));

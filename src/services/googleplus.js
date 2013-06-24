@@ -3,8 +3,12 @@ $.fn.lifestream.feeds.googleplus = function( config, callback ) {
 
   var template = $.extend({},
     {
-    posted: '<a href="${actor.url}">${actor.displayName}</a> has posted a new entry <a href="${url}" '
-        + 'title="${id}">${title}</a> <!--With--> ${object.replies.totalItems} replies, ${object.plusoners.totalItems} +1s, ${object.resharers.totalItems} Reshares'
+    posted: '<a href="${actor.url}">${actor.displayName}</a>' +
+      ' has posted a new entry <a href="${url}" ' +
+      'title="${id}">${title}</a> <!--With--> ' +
+      '${object.replies.totalItems} replies, ' +
+      '${object.plusoners.totalItems} +1s, ' +
+      '${object.resharers.totalItems} Reshares'
     },
     config.template),
 
@@ -28,13 +32,13 @@ $.fn.lifestream.feeds.googleplus = function( config, callback ) {
 
   $.ajax({
     url: "https://www.googleapis.com/plus/v1/people/" + config.user +
-	    "/activities/public",
-	  data: {
-	    key: config.key
-	  },
+      "/activities/public",
+    data: {
+      key: config.key
+    },
     dataType: 'jsonp',
     success: function( data ) {
-	   if (data.error) {
+     if (data.error) {
         callback([]);
         if (console && console.error) {
           console.error('Error loading Google+ stream.', data.error);
