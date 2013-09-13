@@ -2229,10 +2229,14 @@ $.fn.lifestream.feeds.twitter = function( config, callback ) {
         text = $tweet.find('.js-tweet-text')
           .find('.tco-ellipsis').remove().end()
           .text(),
-        $time = $tweet.find('.tweet-timestamp');
+        $time = $tweet.find('.tweet-timestamp'),
         // add missing century and move time to end for IE8
-        var time = $time.attr('title').split(' - ');
-      var created_at = new Date(time[1].replace(/^([1-9][0-9]?) ([A-Z][a-z]{2,}) ([1-9][0-9])$/, '$1 $2 ' + ((new Date()).getYear()+'').substr(0, 2) + '$3') + ' ' + time[0]),
+        time = $time.attr('title').split(' - ');
+      var year = (new Date()).getYear();
+      if (year < 2000)
+      	year += 1900;
+      time = time[1].replace(/^([1-9][0-9]?) ([A-Z][a-z]{2,}) ([1-9][0-9])$/, '$1 $2 ' + (year+'').substr(0, 2) + '$3') + ' ' + time[0];
+      var created_at = new Date(time),
         url = $time.attr('href');
 
         output.push({
