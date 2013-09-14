@@ -1,4 +1,4 @@
-(function($) {
+﻿(function($) {
   "use strict";
 $.fn.lifestream.feeds.twitter = function( config, callback ) {
   var yql = 'USE "http://yqlblog.net/samples/data.html.cssselect.xml"' +
@@ -66,7 +66,9 @@ $.fn.lifestream.feeds.twitter = function( config, callback ) {
           .find('.tco-ellipsis').remove().end()
           .text(),
         $time = $tweet.find('.tweet-timestamp'),
-        created_at = new Date($time.attr('title')),
+        // add missing century for IE8
+        year = (new Date()).getYear(),
+        created_at = new Date(($time.attr('title')+'').replace(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ([1-3][0-9])/, '$1 ' + Math.floor((year < 1900 ? year + 1900 : year) / 100) + '$2')),
         url = $time.attr('href');
 
         output.push({
