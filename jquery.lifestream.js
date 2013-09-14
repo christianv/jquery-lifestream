@@ -2230,13 +2230,9 @@ $.fn.lifestream.feeds.twitter = function( config, callback ) {
           .find('.tco-ellipsis').remove().end()
           .text(),
         $time = $tweet.find('.tweet-timestamp'),
-        // add missing century and move time to end for IE8
-        time = $time.attr('title').split(' - ');
-      var year = (new Date()).getYear();
-      if (year < 2000)
-      	year += 1900;
-      time = time[1].replace(/^([1-9][0-9]?) ([A-Z][a-z]{2,}) ([1-9][0-9])$/, '$1 $2 ' + (year+'').substr(0, 2) + '$3') + ' ' + time[0];
-      var created_at = new Date(time),
+        // add missing century for IE8
+        year = (new Date()).getYear(),
+        created_at = new Date(($time.attr('title')+'').replace(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ([1-3][0-9])/, '$1 ' + Math.floor((year < 1900 ? year + 1900 : year) / 100) + '$2')),
         url = $time.attr('href');
 
         output.push({
