@@ -87,11 +87,13 @@
           item = items[i];
           if ( item.html ) {
             $('<li class="'+ settings.classname + '-' +
-               item.config.service + '">').data( "name", item.config.service )
-                                          .data( "url", item.url || "#" )
-                                          .data( "time", item.date )
-                                          .append( item.html )
-                                          .appendTo( ul );
+              (item.classname ? item.classname : item.config.service) +
+              '">')
+                .data( "name", item.config.service )
+                .data( "url", item.url || "#" )
+                .data( "time", item.date )
+                .append( item.html )
+                .appendTo( ul );
           }
         }
 
@@ -127,7 +129,7 @@
           // user has been filled in
           if ( $.fn.lifestream.feeds[config.service] &&
                $.isFunction( $.fn.lifestream.feeds[config.service] ) &&
-               config.user) {
+               (config.user || config.service === 'rss')) {
 
             // You'll be able to get the global settings by using
             // config._settings in your feed
