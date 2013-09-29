@@ -79,53 +79,22 @@
           user: 'denbuzze'
         },
         {
-          service: 'blogger',
-          user: 'googleblog'
-        },
-        {
           service: 'citeulike',
           user: 'dartar'
-        },
-        {
-          service: 'dailymotion',
-          user: 'VideojugTechnologyandCars'
         },
         {
           service: 'delicious',
           user: 'denbuzze'
         },
-        // If you want to fetch your main gallery use your DeviantART nickname.
-        //
-        // To fetch a gallery folder, add the id after a slash character.
-        // Example:
-        // Pick the gallery folder url: e.g.
-        // http://giuliom.deviantart.com/gallery/30227724 .
-        // Append the id, which is 30227724, to your nick obtaining
-        // something like 'mgiulio/30227724'
-        {
-          service: 'deviantart',
-          user: 'gabbyd70',
-          template: {
-            deviationpost: '<a href="http://gabbyd70.deviantart.com/">gabbyd70</a> uploaded a deviation: <a href="${url}">${title}</a>'
-          }
-        },
         {
           service: 'dribbble',
           user: 'flarup'
-        },
-        {
-          service: 'facebook_page',
-          user: '103257716379127'
         },
         // find your flickr id @
         // http://www.flickr.com/services/api/explore/?method=flickr.people.findByUsername
         {
           service: 'flickr',
           user: '60378309@N02'
-        },
-        {
-          service: 'formspring',
-          user: 'formspring'
         },
         {
           service: 'forrst',
@@ -146,12 +115,6 @@
           user: '112594588017353316971',
           key: 'AIzaSyCB8pKtPwGWkOMfe49CopUM40F6seVv5AE'
         },
-        // Go to instapaper.com, click Liked and open rss feed, copy last two parts of the url
-        // including the slash
-        {
-          service: 'instapaper',
-          user: '339501/W2nHbK9Bo4Q1wgd2irogorycEV0'
-        },
         {
           service: 'iusethis',
           user: 'marcus'
@@ -164,24 +127,6 @@
           service: 'librarything',
           user: 'simongee'
         },
-        // Go to http://www.gomiso.com/
-        // e.g. <meta name="user" content="388629" />
-        {
-          service: 'miso',
-          user: '226935'
-        },
-        {
-          service: 'mlkshk',
-          user: 'billturner'
-        },
-        {
-          service: 'pinboard',
-          user: 'mattandrews'
-        },
-        {
-          service: 'posterous',
-          user: 'techcrunch'
-        },
         {
           service: 'reddit',
           user: 'simongee'
@@ -189,14 +134,6 @@
         {
           service: 'rss',
           user: 'http://qz.com/feed/'
-        },
-        {
-          service: 'slideshare',
-          user: 'denbuzze'
-        },
-        {
-          service: 'snipplr',
-          user: 'sdxxx'
         },
         // Run javascript:alert(userid); when you're logged in at stackoverflow
         {
@@ -223,16 +160,98 @@
           language: 'en'
         },
         {
-          service: 'wordpress',
-          user: 'pixartimes'
-        },
-        {
           service: 'youtube',
           user: 'denbuzze'
         },
         {
           service: 'zotero',
           user: '820015'
+        },
+        // via RSS
+        // Blogger
+        {
+          "service": "rss",
+          "url": "http://googleblog.blogspot.com/feeds/posts/default?alt=rss"
+        },
+        // Dailymotion
+        {
+          "service": "rss",
+          "url": "http://www.dailymotion.com/rss/user/VideojugTechnologyandCars",
+          "action": "uploaded a video"
+        },
+        // Deviantart
+        {
+          "service": "rss",
+          "url": "http://backend.deviantart.com/rss.xml?q=by:gabbyd70&type=journal&formatted=1",
+          "author": {
+            "name": "gabbyd70",
+            "url": "http://gabbyd70.deviantart.com/"
+          },
+          "action": "uploaded a deviation",
+          "favicon": "http://deviantart.com/favicon.ico"
+        },
+        // Facebook Page
+        {
+          "service": "rss",
+          "url": "http://www.facebook.com/feeds/page.php?id=19374573752&format=rss20"
+        },
+        // Fancy
+        {
+          "service": "rss",
+          "url": "http://www.fancy.com/rss/arminrosu",
+          "action": "fancy'd"
+        },
+        // Foursquare
+        {
+          "service": "rss",
+          "url": "https://feeds.foursquare.com/history/U4KXVZDFF5LUVRX4RLOH4BUHQVONUKIE.rss",
+          "action": "checked in @"
+        },
+        // Instapaper
+        {
+          "service": "rss",
+          "url": "http://www.instapaper.com/starred/rss/339501/W2nHbK9Bo4Q1wgd2irogorycEV0",
+          "action": "loved"
+        },
+        // Miso
+        {
+          "service": "rss",
+          "url": "http://www.gomiso.com/feeds/user/226935/checkins.rss",
+          "action": "checked in to"
+        },
+        // Mlkshk
+        {
+          "service": "rss",
+          "url": "http://mlkshk.com/user/billturner/rss"
+        },
+        // Pinboard
+        {
+          "service": "rss",
+          "url": "http://feeds.pinboard.in/rss/u:mattandrews",
+          "favicon": "http://pinboard.in/favicon.ico"
+        },
+        // Quora
+        {
+          "service": "rss",
+          "url": "http://www.quora.com/Armin-Rosu/rss",
+          "action": ""
+        },
+        // Slideshare
+        {
+          "service": "rss",
+          "url": "http://www.slideshare.net/rss/user/denbuzze",
+          "action": "uploaded a presentation"
+        },
+        // Snipplr
+        {
+          "service": "rss",
+          "url": "http://snipplr.com/rss/users/sdxxx",
+          "action": "posted a snippet"
+        },
+        // Wordpress
+        {
+          "service": "rss",
+          "url": "http://pixartimes.wordpress.com/feed"
         }
       ];
 
@@ -266,7 +285,7 @@
             $("#lifestream li").each(function(){
               var element = $(this),
                   date = new Date(element.data("time"));
-              element.append(' <abbr class="timeago" title="' + date.toISO8601(date) + '">' + date + "</abbr>");
+              element.append(' <time class="timeago" datetime="' + date.toISO8601(date) + '">' + date + "</time>");
             })
             $("#lifestream .timeago").timeago();
           }

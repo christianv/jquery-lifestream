@@ -16,50 +16,55 @@ Currently supports the following feeds:
 
 * [Bitbucket](https://bitbucket.org/)
 * [Bitly](http://bitly.com)
-* [Blogger](http://blogger.com)
 * [Citeulike](http://www.citeulike.org)
-* [Dailymotion](http://dailymotion.com)
 * [Delicious](http://delicious.com)
-* [DeviantART](http://deviantart.com)
 * [Disqus](http://disqus.com)
 * [Dribbble](http://dribbble.com)
-* [Facebook Pages](http://www.facebook.com/pages)
-* [Fancy](http://www.fancy.com)
 * [Flickr](http://flickr.com)
 * [Foomark](http://foomark.com)
-* [Formspring](http://formspring.com)
 * [Forrst](http://forrst.com)
-* [Foursquare](http://foursquare.com)
 * [Gimmebar](http://gimmebar.com)
 * [Github](http://github.com)
 * [Google+](http://plus.google.com)
 * [Hypem](http://hypem.com/)
-* [Instapaper](http://www.instapaper.com)
 * [Iusethis](http://osx.iusethis.com/)
 * [Last.fm](http://last.fm)
 * [LibraryThing.com](http://librarything.com)
 * [Linkedin.com](http://linkedin.com) (via [Network Updates RSS feed](http://www.linkedin.com/rssAdmin?display=&trk=uscp_rss))
 * [Mendeley](http://mendeley.com)
-* [Miso](http://gomiso.com)
-* [Mlkshk](http://mlkshk.com)
-* [Pinboard](http://pinboard.in)
-* [Posterous](http://posterous.com)
-* [Quora](http://quora.com)
 * [Reddit](http://reddit.com)
 * [RSS](http://en.wikipedia.org/wiki/RSS)
-* [Slideshare](http://slideshare.com)
-* [Snipplr](http://snipplr.com)
 * [Stackoverflow](http://stackoverflow.com)
 * [Tumblr](http://tumblr.com)
 * [Twitter](http://twitter.com)
 * [Vimeo](http://vimeo.com)
 * [Wikipedia](http://wikipedia.com)
-* [Wordpress](http://wordpress.com)
 * [Youtube](http://youtube.com)
 * [Zotero](http://zotero.com)
 
 Feel free to fork the project and add your own feeds in.
 Just send a pull request to [christianv/jquery-lifestream][jquery-lifestream] when you're finished.
+
+### Via the RSS Service
+
+These services are supported via the [RSS Service](RSS_Services.md).
+
+Did we miss one? Please open an issue and we'll add it to the list.
+
+* [Blogger](http://blogger.com)
+* [Dailymotion](http://dailymotion.com)
+* [DeviantART](http://deviantart.com)
+* [Facebook Pages](http://www.facebook.com/pages)
+* [Fancy](http://www.fancy.com)
+* [Foursquare](http://foursquare.com)
+* [Instapaper](http://www.instapaper.com)
+* [Miso](http://gomiso.com)
+* [Mlkshk](http://mlkshk.com)
+* [Pinboard](http://pinboard.in)
+* [Quora](http://quora.com)
+* [Slideshare](http://slideshare.com)
+* [Snipplr](http://snipplr.com)
+* [Wordpress](http://wordpress.com)
 
 ## Extensions
 
@@ -153,17 +158,17 @@ The plug-in accepts one configuration JSON object:
 
 ``` javascript
 $("#lifestream").lifestream({
-  classname: "lifestream",
-  feedloaded: feedcallback,
-  limit: 30,
-  list:[
+  "classname": "lifestream",
+  "feedloaded": feedcallback,
+  "limit": 30,
+  "list":[
     {
-      service: "github",
-      user: "christianv"
+      "service": "github",
+      "user": "christianv"
     },
     {
-      service: "twitter",
-      user: "denbuzze"
+      "service": "twitter",
+      "user": "denbuzze"
     }
   ]
 });
