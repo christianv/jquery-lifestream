@@ -71,7 +71,8 @@
             "complete_url": 'http://twitter.com/' + config.user +
               "/status/" + status.id_str
           } ),
-          "url": 'http://twitter.com/' + config.user
+          "url": 'http://twitter.com/' + config.user +
+              "/status/" + status.id_str
         });
       }
 
