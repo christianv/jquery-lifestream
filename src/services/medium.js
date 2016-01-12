@@ -1,5 +1,4 @@
-
-n($) {
+(function($) {
 $.fn.lifestream.feeds.medium = function( config, callback ) {
 
   var template = $.extend({}, config.template);
