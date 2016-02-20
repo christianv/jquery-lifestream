@@ -127,7 +127,7 @@
           // user has been filled in
           if ( $.fn.lifestream.feeds[config.service] &&
                $.isFunction( $.fn.lifestream.feeds[config.service] ) &&
-               config.user) {
+            (config.user || config.playlist)) {
 
             // You'll be able to get the global settings by using
             // config._settings in your feed
