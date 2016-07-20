@@ -1,0 +1,19 @@
+{
+  "name": "jquery-lifestream",
+  "version": "0.5.6-pre",
+  "description": "jQuery plugin to show a stream of your online activity.",
+  "main": "jquery.lifestream.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/christianvuerings/jquery-lifestream.git"
+  },
+  "author": "Christian Vuerings",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/christianvuerings/jquery-lifestream/issues"
+  },
+  "homepage": "https://github.com/christianvuerings/jquery-lifestream#readme"
+}
